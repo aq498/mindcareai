@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the App (Gemini AI)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex; /* Use flexbox for centering content */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            min-height: 100vh; /* Ensure body takes full height */
+            padding: 1rem; /* General padding around content */
+            position: relative;
+            flex-direction: column; /* Allow content to stack vertically */
+        }
+        /* AppSheet-like blue for accents */
+        .appsheet-blue {
+            background-color: #4285F4; /* Google Blue */
+        }
+        .appsheet-text-blue {
+            color: #4285F4;
+        }
+
+        /* Hide default radio buttons visually but keep functionality */
+        input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* Base style for custom radio button labels (now used for N/Y buttons) */
+        input[type="radio"] + label {
+            display: flex; /* Use flex for centering text */
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem; /* Larger padding for button feel */
+            border: 1px solid #d1d5db; /* Light gray border */
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #fff;
+            color: #374151; /* Dark gray text */
+            flex-grow: 1; /* Allow buttons to expand in flex container */
+            font-weight: 600; /* Make text bolder */
+        }
+
+        /* Checked state for N/Y buttons */
+        input[type="radio"]:checked + label {
+            background-color: #4285F4; /* Blue background when checked */
+            border-color: #4285F4; /* Blue border when checked */
+            color: #fff; /* White text when checked */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        /* Removed specific color overrides for checked states of green, orange, red options */
+        /* They will now inherit the default checked state (blue) */
+        input[type="radio"].green-option:checked + label { /* These classes are now only for internal logic, not styling */ }
+        input[type="radio"].orange-option:checked + label { /* These classes are now only for internal logic, not styling */ }
+        input[type="radio"].red-option:checked + label { /* These classes are now only for internal logic, not styling */ }
+
+        /* Custom Dropdown Styling */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+        .dropdown-selected-value {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.625rem 1rem; /* Adjusted padding */
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #374151;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .dropdown-selected-value:focus, .dropdown-selected-value:hover {
+            border-color: #4285F4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+            outline: none;
+        }
+        .dropdown-selected-value.placeholder {
+            color: #9ca3af; /* Placeholder color */
+        }
+        .dropdown-options {
+            position: absolute;
+            top: 100%; /* Position below the selected value */
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px; /* Limit height for scroll */
+            overflow-y: auto;
+            z-index: 50; /* Ensure it's above other content */
+            margin-top: 0.25rem;
+            display: none; /* Hidden by default */
+        }
+        .dropdown-options.active {
+            display: block;
+        }
+        .dropdown-option-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            color: #374151;
+            transition: background-color 0.1s ease-in-out;
+        }
+        .dropdown-option-item:hover {
+            background-color: #f3f4f6;
+        }
+        .dropdown-option-item.selected {
+            background-color: #e0f2fe; /* Light blue for selected item */
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .dropdown-arrow {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.2s ease-in-out;
+        }
+        .dropdown-arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        /* Age Input with Plus/Minus Buttons */
+        .age-input-group {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            overflow: hidden; /* Ensures buttons and input stay within border-radius */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .age-input-group input[type="number"] {
+            flex-grow: 1;
+            padding: 0.625rem 1rem;
+            border: none; /* Remove individual input border */
+            text-align: center;
+            -moz-appearance: textfield; /* Hide Firefox stepper arrows */
+            outline: none;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+        .age-input-group input[type="number"]::-webkit-outer-spin-button,
+        .age-input-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .age-input-group button {
+            background-color: #f9fafb; /* Light background for buttons */
+            border: none;
+            padding: 0.625rem 1rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: #4285F4; /* Blue color for plus/minus */
+            transition: background-color 0.1s ease-in-out;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+        .age-input-group button:hover {
+            background-color: #e5e7eb;
+        }
+        .age-input-group button:active {
+            background-color: #d1d5db;
+        }
+
+        /* Style for the decision tree output box */
+        .decision-output-box {
+            background-color: #4285F4; /* AppSheet blue */
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem; /* Rounded corners */
+            text-align: center;
+            font-size: 1.25rem; /* Larger text */
+            font-weight: bold;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        /* Style for the LLM advice box */
+        .llm-advice-box {
+            background-color: #e0f2fe; /* Lighter blue for advice */
+            color: #1f2937; /* Dark text for readability */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #90cdf4; /* Light blue border */
+        }
+        .llm-advice-box h3 {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            color: #4285F4; /* Blue heading */
+        }
+        .llm-advice-box p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .llm-advice-box ul { /* Added style for unordered lists in LLM boxes */
+            list-style-type: disc;
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .llm-advice-box li { /* Added style for list items in LLM boxes */
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Return to Home button styling */
+        .return-home-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background-color: #4285F4;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: background-color 0.2s ease-in-out;
+            z-index: 10;
+        }
+        .return-home-btn:hover {
+            background-color: #3367D6;
+        }
+
+        /* Analysis box styles */
+        .analysis-box {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .analysis-box h3 {
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .analysis-box ul {
+            list-style-type: disc;
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .analysis-box li {
+            margin-bottom: 0.5rem;
+        }
+        .analysis-box .reasoning {
+            font-style: italic;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Analysis box color coding */
+        .analysis-box.green-highlight {
+            background-color: #f0fdf4; /* Very light green background */
+            border: 1px solid #34d399; /* Green border */
+            color: #065f46; /* Dark green text */
+        }
+        .analysis-box.green-highlight h3,
+        .analysis-box.green-highlight .reasoning {
+            color: #065f46;
+        }
+
+        .analysis-box.orange-highlight {
+            background-color: #fff7ed; /* Very light orange background */
+            border: 1px solid #fb923c; /* Orange border */
+            color: #9a3412; /* Dark orange text */
+        }
+        .analysis-box.orange-highlight h3,
+        .analysis-box.orange-highlight .reasoning {
+            color: #9a3412;
+        }
+
+        /* Red for negative/concerning answers */
+        .analysis-box.red-highlight {
+            background-color: #fee2e2; /* bg-red-100 */
+            border: 1px solid #ef4444; /* border-red-500 */
+            color: #991b1b; /* text-red-800 */
+        }
+        .analysis-box.red-highlight h3,
+        .analysis-box.red-highlight .reasoning {
+            color: #991b1b;
+        }
+        /* Centering for homepage and survey containers */
+        #homepage, #surveyContainer {
+            margin: 0 auto; /* Center horizontally */
+        }
+
+        /* Specific style for Positive Aspects section */
+        #positiveAspectsSection {
+            background-color: #dcfce7; /* bg-green-100 */
+            border: 1px solid #22c55e; /* border-green-500 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        #positiveAspectsSection h4 {
+            color: #166534; /* text-green-800 */
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh; /* Limit height for scrollability */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-header {
+            padding: 1rem 1.5rem;
+            background-color: #4285F4;
+            color: white;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .chat-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .chat-input-area button {
+            background-color: #4285F4;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .chat-input-area button:hover {
+            background-color: #3367D6;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            word-wrap: break-word;
+        }
+        .message-bubble.user {
+            background-color: #dbeafe; /* Light blue for user messages */
+            align-self: flex-end;
+            color: #1e40af;
+        }
+        .message-bubble.ai {
+            background-color: #f3f4f6; /* Light gray for AI messages */
+            align-self: flex-start;
+            color: #374151;
+        }
+        .message-bubble.ai.loading {
+            font-style: italic;
+            color: #6b7280;
+        }
+        /* Consolidated Disclaimer */
+        #globalDisclaimer {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #fef2f2; /* bg-red-50 */
+            border: 1px solid #f87171; /* border-red-400 */
+            color: #b91c1c; /* text-red-700 */
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            text-align: center;
+            max-width: 800px; /* Limit width for readability */
+            width: 100%;
+        }
+        #globalDisclaimer p {
+            margin-bottom: 0.5rem;
+        }
+        #globalDisclaimer p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 relative">
+
+    <!-- Homepage Container -->
+    <div id="homepage" class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 text-center flex flex-col items-center justify-center min-h-[500px]">
+        <h1 class="text-4xl font-bold appsheet-text-blue mb-6">Welcome to the App</h1>
+        <p class="text-lg text-gray-700 mb-10">Choose an option below to get started.</p>
+
+        <button id="openSurveyBtn"
+                class="appsheet-blue text-white py-3 px-8 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-3/4 max-w-xs text-xl font-semibold transition-colors duration-200 mb-6">
+            Open Depression Survey
+        </button>
+
+        <button id="openAITherapistBtn"
+                class="bg-teal-600 text-white py-3 px-8 rounded-lg shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-75 w-3/4 max-w-xs text-xl font-semibold transition-colors duration-200">
+            AI Therapist
+        </button>
+    </div>
+
+    <!-- Survey Container -->
+    <div id="surveyContainer" class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden hidden relative">
+        <button id="returnHomeFromSurvey" class="return-home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+            </svg>
+            Home
+        </button>
+        <!-- Header Section -->
+        <div class="appsheet-blue text-white p-6 text-center">
+            <h1 class="text-3xl font-bold mb-1">Depression Survey</h1>
+            <p class="text-sm opacity-90">Please answer the questions below.</p>
+        </div>
+
+        <!-- Survey Form -->
+        <form id="depressionSurveyForm" class="p-6 space-y-6">
+            <!-- Section: Personal Information -->
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Personal Information</h2>
+
+                <!-- Age -->
+                <div class="mb-4">
+                    <label for="Age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <div class="age-input-group">
+                        <button type="button" id="decrementAgeBtn">-</button>
+                        <input type="number" id="Age" name="Age" min="1" max="120" placeholder="1"
+                               class="focus:ring-blue-500 focus:border-blue-500" required>
+                        <button type="button" id="incrementAgeBtn">+</button>
+                    </div>
+                    <p id="ageError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid age between 1 and 120.</p>
+                </div>
+
+                <!-- Gender -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="custom-dropdown" data-name="Gender">
+                        <div class="dropdown-selected-value placeholder" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span>Select Gender</span>
+                            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="dropdown-options" role="listbox">
+                            <div class="dropdown-option-item" data-value="Male">Male</div>
+                            <div class="dropdown-option-item" data-value="Female">Female</div>
+                            <!-- No "Add option" as requested -->
+                        </div>
+                        <input type="hidden" name="Gender" required>
+                    </div>
+                </div>
+
+                <!-- Profession -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                    <div class="custom-dropdown" data-name="Profession">
+                        <div class="dropdown-selected-value placeholder" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span>Select Profession</span>
+                            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="dropdown-options" role="listbox">
+                            <div class="dropdown-option-item" data-value="Student">Student</div>
+                            <div class="dropdown-option-item" data-value="Employee">Employee</div>
+                            <div class="dropdown-option-item" data-value="Others">Others</div>
+                        </div>
+                        <input type="hidden" name="Profession" required>
+                    </div>
+                </div>
+
+                <!-- Marital Status -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
+                    <div class="custom-dropdown" data-name="MaritalStatus">
+                        <div class="dropdown-selected-value placeholder" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span>Select Marital Status</span>
+                            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="dropdown-options" role="listbox">
+                            <div class="dropdown-option-item" data-value="Single">Single</div>
+                            <div class="dropdown-option-item" data-value="Married">Married</div>
+                            <div class="dropdown-option-item" data-value="Divorced">Divorced</div>
+                        </div>
+                        <input type="hidden" name="MaritalStatus" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Well-being Questions (Yes/No) -->
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Well-being & Daily Life</h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Are you satisfied with your life?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="SatisfiedLifeNo" name="SatisfiedLife" value="No" required>
+                        <label for="SatisfiedLifeNo">N</label>
+                        <input type="radio" id="SatisfiedLifeYes" name="SatisfiedLife" value="Yes">
+                        <label for="SatisfiedLifeYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Have you dropped activities you used to enjoy?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="DroppedActivitiesNo" name="DroppedActivities" value="No" required>
+                        <label for="DroppedActivitiesNo">N</label>
+                        <input type="radio" id="DroppedActivitiesYes" name="DroppedActivities" value="Yes">
+                        <label for="DroppedActivitiesYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel your life is empty?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="FeelLifeEmptyNo" name="FeelLifeEmpty" value="No" required>
+                        <label for="FeelLifeEmptyNo">N</label>
+                        <input type="radio" id="FeelLifeEmptyYes" name="FeelLifeEmpty" value="Yes">
+                        <label for="FeelLifeEmptyYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you often feel bored?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="BoredNo" name="Bored" value="No" required>
+                        <label for="BoredNo">N</label>
+                        <input type="radio" id="BoredYes" name="Bored" value="Yes">
+                        <label for="BoredYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel helpless?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="FeelHelplessNo" name="FeelHelpless" value="No" required>
+                        <label for="FeelHelplessNo">N</label>
+                        <input type="radio" id="FeelHelplessYes" name="FeelHelpless" value="Yes">
+                        <label for="FeelHelplessYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Are you afraid that something bad will happen to you?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="AfraidBadHappeningNo" name="AfraidBadHappening" value="No" required>
+                        <label for="AfraidBadHappeningNo">N</label>
+                        <input type="radio" id="AfraidBadHappeningYes" name="AfraidBadHappening" value="Yes">
+                        <label for="AfraidBadHappeningYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Are you hopeful about the future?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="HopefulAboutFutureNo" name="HopefulAboutFuture" value="No" required>
+                        <label for="HopefulAboutFutureNo">N</label>
+                        <input type="radio" id="HopefulAboutFutureYes" name="HopefulAboutFuture" value="Yes">
+                        <label for="HopefulAboutFutureYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you spend time happily?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="SpendTimeHappilyNo" name="SpendTimeHappily" value="No" required>
+                        <label for="SpendTimeHappilyNo">N</label>
+                        <input type="radio" id="SpendTimeHappilyYes" name="SpendTimeHappily" value="Yes">
+                        <label for="SpendTimeHappilyYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel full of energy?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="FeelEnergyNo" name="FeelEnergy" value="No" required>
+                        <label for="FeelEnergyNo">N</label>
+                        <input type="radio" id="FeelEnergyYes" name="FeelEnergy" value="Yes">
+                        <label for="FeelEnergyYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you prefer to stay home rather than going out and doing new things?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="PreferStayHomeNo" name="PreferStayHome" value="No" required>
+                        <label for="PreferStayHomeNo">N</label>
+                        <input type="radio" id="PreferStayHomeYes" name="PreferStayHome" value="Yes">
+                        <label for="PreferStayHomeYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you have problems with memory loss?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="MemoryLossNo" name="MemoryLoss" value="No" required>
+                        <label for="MemoryLossNo">N</label>
+                        <input type="radio" id="MemoryLossYes" name="MemoryLoss" value="Yes">
+                        <label for="MemoryLossYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you consider yourself worthless?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="ConsiderWorthlessNo" name="ConsiderWorthless" value="No" required>
+                        <label for="ConsiderWorthlessNo">N</label>
+                        <input type="radio" id="ConsiderWorthlessYes" name="ConsiderWorthless" value="Yes">
+                        <label for="ConsiderWorthlessYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you cry most of the time?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="CryMostOfTheTimeNo" name="CryMostOfTheTime" value="No" required>
+                        <label for="CryMostOfTheTimeNo">N</label>
+                        <input type="radio" id="CryMostOfTheTimeYes" name="CryMostOfTheTime" value="Yes">
+                        <label for="CryMostOfTheTimeYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Are you feeling reduced appetite and losing weight?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="FeelingReduceAppetiteAndLosingWeightNo" name="FeelingReduceAppetiteAndLosingWeight" value="No" required>
+                        <label for="FeelingReduceAppetiteAndLosingWeightNo">N</label>
+                        <input type="radio" id="FeelingReduceAppetiteAndLosingWeightYes" name="FeelingReduceAppetiteAndLosingWeight" value="Yes">
+                        <label for="FeelingReduceAppetiteAndLosingWeightYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel your situation is hopeless?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="SituationHopelessNo" name="SituationHopeless" value="No" required>
+                        <label for="SituationHopelessNo">N</label>
+                        <input type="radio" id="SituationHopelessYes" name="SituationHopeless" value="Yes">
+                        <label for="SituationHopelessYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel others are better than you?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="PeopleBetterThanYouNo" name="PeopleBetterThanYou" value="No" required>
+                        <label for="PeopleBetterThanYouNo">N</label>
+                        <input type="radio" id="PeopleBetterThanYouYes" name="PeopleBetterThanYou" value="Yes">
+                        <label for="PeopleBetterThanYouYes">Y</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel others would be better off if you died?</label>
+                    <div class="flex gap-2 w-full">
+                        <input type="radio" id="OthersWouldBetterYouDiedNo" name="OthersWouldBetterYouDied" value="No" required>
+                        <label for="OthersWouldBetterYouDiedNo">N</label>
+                        <input type="radio" id="OthersWouldBetterYouDiedYes" name="OthersWouldBetterYouDied" value="Yes">
+                        <label for="OthersWouldBetterYouDiedYes">Y</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Graded Questions -->
+            <div class="pb-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Social & Emotional Well-being</h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Are you avoiding social gatherings?</label>
+                    <div class="flex flex-wrap gap-2">
+                        <input type="radio" id="AvoidingSocialGatheringsMost" name="AvoidingSocialGatherings" value="Most of the times" required>
+                        <label for="AvoidingSocialGatheringsMost">Most of the times</label>
+                        <input type="radio" id="AvoidingSocialGatheringsSometimes" name="AvoidingSocialGatherings" value="Sometimes">
+                        <label for="AvoidingSocialGatheringsSometimes">Sometimes</label>
+                        <input type="radio" id="AvoidingSocialGatheringsNot" name="AvoidingSocialGatherings" value="Not at all">
+                        <label for="AvoidingSocialGatheringsNot">Not at all</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you sleep well?</label>
+                    <div class="flex flex-wrap gap-2">
+                        <input type="radio" id="SleepWellMost" name="SleepWell" value="Most of the times" required>
+                        <label for="SleepWellMost">Most of the times</label>
+                        <input type="radio" id="SleepWellSometimes" name="SleepWell" value="Sometimes">
+                        <label for="SleepWellSometimes">Sometimes</label>
+                        <input type="radio" id="SleepWellNot" name="SleepWell" value="Not at all">
+                        <label for="SleepWellNot">Not at all</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you feel bad and guilty?</label>
+                    <div class="flex flex-wrap gap-2">
+                        <input type="radio" id="FeelBadAndGuiltyMost" name="FeelBadAndGuilty" value="Most of the times" required>
+                        <label for="FeelBadAndGuiltyMost">Most of the times</label>
+                        <input type="radio" id="FeelBadAndGuiltySometimes" name="FeelBadAndGuilty" value="Sometimes">
+                        <label for="FeelBadAndGuiltySometimes">Sometimes</label>
+                        <input type="radio" id="FeelBadAndGuiltyNot" name="FeelBadAndGuilty" value="Not at all">
+                        <label for="FeelBadAndGuiltyNot">Not at all</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="appsheet-blue text-white py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full text-lg font-semibold transition-colors duration-200">
+                Submit Survey
+            </button>
+
+            <!-- New button to fill survey randomly -->
+            <button id="fillRandomlyBtn"
+                    class="mt-4 bg-gray-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75 w-full text-lg font-semibold transition-colors duration-200">
+                Fill Survey Randomly
+            </button>
+        </form>
+
+        <!-- Survey Results Display Area -->
+        <div id="surveyResults" class="p-6 bg-gray-50 rounded-b-xl hidden">
+            <!-- Decision Tree Output Box (Prediction at top) -->
+            <div id="decisionOutputBox" class="decision-output-box mb-4 hidden">
+                <!-- Decision tree prediction will be displayed here -->
+            </div>
+
+            <!-- Gemini AI Advice Button -->
+            <button id="getGeminiAdvice"
+                    class="appsheet-blue text-white py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full text-lg font-semibold transition-colors duration-200 flex items-center justify-center mb-4">
+                <span id="geminiAdviceButtonText">✨ Get Personalized Supportive Advice ✨</span>
+                <div id="geminiAdviceSpinner" class="spinner hidden"></div>
+            </button>
+
+            <!-- LLM Advice Output Box -->
+            <div id="llmAdviceBox" class="llm-advice-box mb-4 hidden">
+                <h3>AI-Generated Supportive Advice:</h3>
+                <p id="llmAdviceContent"></p>
+            </div>
+
+            <!-- Gemini AI Journal Prompt Button -->
+            <button id="getJournalPrompt"
+                    class="bg-pink-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-75 w-full text-lg font-semibold transition-colors duration-200 flex items-center justify-center mb-4">
+                <span id="journalPromptButtonText">✨ Get Journal Prompt ✨</span>
+                <div id="journalPromptSpinner" class="spinner hidden"></div>
+            </button>
+
+            <!-- LLM Journal Prompt Output Box -->
+            <div id="journalPromptBox" class="llm-advice-box mb-4 hidden">
+                <h3>AI-Generated Journal Prompt:</h3>
+                <p id="journalPromptContent"></p>
+            </div>
+
+            <!-- Gemini AI Positive Affirmation Button -->
+            <button id="getPositiveAffirmation"
+                    class="bg-green-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 w-full text-lg font-semibold transition-colors duration-200 flex items-center justify-center mb-4">
+                <span id="positiveAffirmationButtonText">✨ Get Positive Affirmation ✨</span>
+                <div id="positiveAffirmationSpinner" class="spinner hidden"></div>
+            </button>
+
+            <!-- LLM Positive Affirmation Output Box -->
+            <div id="positiveAffirmationBox" class="llm-advice-box mb-4 hidden">
+                <h3>AI-Generated Positive Affirmation:</h3>
+                <p id="positiveAffirmationContent"></p>
+            </div>
+
+            <!-- Detailed Analysis Box (Always visible) -->
+            <div id="detailedAnalysisWrapper">
+                <div id="detailedAnalysisBox" class="analysis-box mb-4">
+                    <h3>Detailed Analysis:</h3>
+                    <p id="analysisReasoning" class="reasoning mb-4"></p>
+
+                    <div id="positiveAspectsSection" class="mb-6">
+                        <h4 class="font-semibold text-green-700 mb-2">Positive Aspects:</h4>
+                        <ul id="positiveAspectsList" class="list-disc list-inside text-gray-700">
+                            <!-- Positive aspects will be inserted here -->
+                        </ul>
+                    </div>
+
+                    <div id="areasForGrowthSection">
+                        <h4 class="font-semibold text-red-700 mb-2">Areas for Growth:</h4>
+                        <ul id="areasForGrowthList" class="list-disc list-inside text-gray-700">
+                            <!-- Areas for growth will be inserted here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="validationMessage" class="text-red-600 mt-4 font-medium hidden">
+                Please fill out all required fields.
+            </div>
+            <button id="resetSurvey"
+                    class="mt-6 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition-colors duration-200">
+                Take Survey Again
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Therapist Chatbox Modal -->
+    <div id="aiTherapistModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="text-xl font-bold">AI Therapist</h2>
+                <button class="modal-close-btn" id="closeAITherapistModal">&times;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will be appended here -->
+                <div class="message-bubble ai">Hello! I'm here to listen and offer supportive responses. How are you feeling today?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type your message..." aria-label="Chat input">
+                <button id="chatSendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consolidated Global Disclaimer Section -->
+    <div id="globalDisclaimer" class="hidden">
+        <p><strong>Disclaimer:</strong> This application provides AI-generated general guidance and is not a medical diagnosis or substitute for professional help.</p>
+        <p>If you are experiencing symptoms of depression, anxiety, or any mental health concerns, please consult a qualified healthcare professional or a mental health specialist.</p>
+        <p>If you are in distress or experiencing a crisis, please seek immediate help from a crisis hotline or emergency services.</p>
+    </div>
+
+
+    <script type="module">
+        // IMPORTANT: This is where you will put your Gemini API Key.
+        // Obtain this key from your Google Cloud Console or AI Studio.
+        // In a real production application, this key should be stored securely on a backend server,
+        // NOT directly in client-side code for security reasons.
+        const GEMINI_API_KEY = "AIzaSyAEgB8ZY2GBnibnsWfpZP2_mT1vQ-HULe0"; // <--- LEAVE THIS EMPTY STRING. Canvas will inject the key.
+
+        // Gemini API Endpoint and Model
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+        const GEMINI_MODEL = "gemini-2.0-flash";
+
+        // DeepSeek AI API Key and Endpoint
+        // IMPORTANT: Replace "YOUR_DEEPSEEK_API_KEY_HERE" with your actual DeepSeek API Key.
+        // For production, this should ideally be handled server-side for security.
+        const DEEPSEEK_API_KEY = "sk-517b3eac91cb4f49908d226cee8dbddd";
+        const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+        const DEEPSEEK_MODEL = "deepseek-chat"; // Or "deepseek-coder" if applicable
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Mapping for display names
+            const displayNames = {
+                Age: 'Age', Gender: 'Gender', Profession: 'Profession', MaritalStatus: 'Marital Status',
+                SatisfiedLife: 'Are you satisfied with your life?', DroppedActivities: 'Have you dropped activities you used to enjoy?',
+                FeelLifeEmpty: 'Do you feel your life is empty?', Bored: 'Do you often feel bored?',
+                FeelHelpless: 'Do you feel helpless?', AfraidBadHappening: 'Are you afraid that something bad will happen to you?',
+                HopefulAboutFuture: 'Are you hopeful about the future?', SpendTimeHappily: 'Do you spend time happily?',
+                FeelEnergy: 'Do you feel full of energy?', PreferStayHome: 'Do you prefer to stay home rather than going out and doing new things?',
+                MemoryLoss: 'Do you have problems with memory loss?', ConsiderWorthless: 'Do you consider yourself worthless?',
+                CryMostOfTheTime: 'Do you cry most of the time?', FeelingReduceAppetiteAndLosingWeight: 'Are you feeling reduced appetite and losing weight?',
+                SituationHopeless: 'Do you feel your situation is hopeless?', PeopleBetterThanYou: 'Do you feel others are better than you?',
+                OthersWouldBetterYouDied: 'Do you feel others would be better off if you died?',
+                AvoidingSocialGatherings: 'Are you avoiding social gatherings?',
+                SleepWell: 'Do you sleep well?',
+                FeelBadAndGuilty: 'Do you feel bad and guilty?'
+            };
+
+            // --- Simulated Decision Tree Logic (Client-Side Placeholder) ---
+            function simulateDecisionTree(responses) {
+                let riskScore = 0;
+                const positiveAspectsDetails = [];
+                const areasForGrowthDetails = [];
+
+                const questionImpact = {
+                    SatisfiedLife: {
+                        Yes: { type: 'positive', advice: "It's wonderful that you feel satisfied with your life! This is a strong indicator of well-being." },
+                        No: { type: 'negative', score: 1, advice: "If you're not satisfied, consider what small changes could bring more joy or purpose into your life. Even tiny steps matter." }
+                    },
+                    DroppedActivities: {
+                        Yes: { type: 'negative', score: 1, advice: "Losing interest in activities is common. Try to reintroduce one small enjoyable activity back into your routine, even for a short time." },
+                        No: { type: 'positive', advice: "It's great that you're still enjoying activities you used to! Maintaining hobbies is important for mental well-being." }
+                    },
+                    FeelLifeEmpty: {
+                        Yes: { type: 'negative', score: 2, advice: "Feeling empty can be tough. Exploring new hobbies or reconnecting with old ones might help fill that space." },
+                        No: { type: 'positive', advice: "It's a positive sign that you don't feel your life is empty. Continue to find meaning and purpose in your daily activities." }
+                    },
+                    Bored: {
+                        Yes: { type: 'negative', score: 1, advice: "Boredom can be a sign to seek new experiences. Consider learning something new or engaging in a creative outlet." },
+                        No: { type: 'positive', advice: "It's good that you don't often feel bored. Staying engaged can contribute to a positive mindset." }
+                    },
+                    FeelHelpless: {
+                        Yes: { type: 'negative', score: 2, advice: "Helplessness can be overwhelming. Focusing on small, achievable tasks can sometimes help regain a sense of control." },
+                        No: { type: 'positive', advice: "Feeling in control is empowering. Keep focusing on what you can influence in your life." }
+                    },
+                    AfraidBadHappening: {
+                        Yes: { type: 'negative', score: 1, advice: "Anxiety about the future is understandable. Practicing mindfulness or deep breathing can sometimes help manage these fears." },
+                        No: { type: 'positive', advice: "It's reassuring that you're not often afraid of bad things happening. This indicates a sense of security." }
+                    },
+                    HopefulAboutFuture: {
+                        Yes: { type: 'positive', advice: "Being hopeful about the future is a wonderful sign of resilience and optimism. Nurture this feeling!" },
+                        No: { type: 'negative', score: 1, advice: "It's hard when hope feels distant. Try to set small, achievable goals for tomorrow, or reflect on past challenges you've overcome." }
+                    },
+                    SpendTimeHappily: {
+                        Yes: { type: 'positive', advice: "Spending time happily is crucial for well-being. Keep prioritizing activities that bring you joy." },
+                        No: { type: 'negative', score: 1, advice: "Finding joy in daily life is important. Think about what truly makes you happy and try to incorporate more of it." }
+                    },
+                    FeelEnergy: {
+                        Yes: { type: 'positive', advice: "Feeling energetic is a great asset! Make sure to maintain healthy habits that support your energy levels." },
+                        No: { type: 'negative', score: 1, advice: "Low energy can be draining. Ensure you're getting enough rest and consider light physical activity, which can sometimes boost mood." }
+                    },
+                    PreferStayHome: {
+                        Yes: { type: 'negative', score: 1, advice: "While comfort is good, isolation can worsen feelings of sadness. Try to connect with one friend or family member, even if it's just a short call." },
+                        No: { type: 'positive', advice: "It's positive that you enjoy going out and trying new things! This engagement can enrich your life." }
+                    },
+                    MemoryLoss: {
+                        Yes: { type: 'negative', score: 1, advice: "Memory issues can be frustrating. Keeping notes or setting reminders can help, and discussing this with a doctor is advisable." },
+                        No: { type: 'positive', advice: "It's good that you don't have problems with memory loss. Maintaining cognitive health is beneficial." }
+                    },
+                    ConsiderWorthless: {
+                        Yes: { type: 'negative', score: 3, advice: "Remember your inherent worth. Everyone has value, and you are no exception. Try listing things you appreciate about yourself." },
+                        No: { type: 'positive', advice: "It's important that you don't consider yourself worthless. Recognizing your value is a key part of self-esteem." }
+                    },
+                    CryMostOfTheTime: {
+                        Yes: { type: 'negative', score: 2, advice: "It's okay to cry, but if it's constant, it might be a sign to seek support. Talking to someone you trust can be a good first step." },
+                        No: { type: 'positive', advice: "It's a good sign that you don't cry most of the time. Emotional stability is a positive indicator." }
+                    },
+                    FeelingReduceAppetiteAndLosingWeight: {
+                        Yes: { type: 'negative', score: 2, advice: "Changes in appetite and weight can be concerning. Ensuring you maintain a balanced diet is important, and if this persists, consult a doctor." },
+                        No: { type: 'positive', advice: "Maintaining a healthy appetite and stable weight is a good sign of physical and mental well-being." }
+                    },
+                    SituationHopeless: {
+                        Yes: { type: 'negative', score: 3, advice: "Even in the darkest moments, hope can be found. Try to focus on one small positive thing each day." },
+                        No: { type: 'positive', advice: "It's positive that you don't feel your situation is hopeless. This resilience can help you navigate challenges." }
+                    },
+                    PeopleBetterThanYou: {
+                        Yes: { type: 'negative', score: 2, advice: "Comparing yourself to others can be disheartening. Focus on your own journey and celebrate your unique strengths." },
+                        No: { type: 'positive', advice: "It's healthy to recognize your own worth without constantly comparing yourself to others." }
+                    },
+                    OthersWouldBetterYouDied: {
+                        Yes: { type: 'negative', score: 5, advice: "These thoughts are serious and indicate you need immediate support. Please reach out to a crisis hotline or a mental health professional right away. You are valued." },
+                        No: { type: 'positive', advice: "It's important to know that you are valued and your presence matters to others." }
+                    },
+                    AvoidingSocialGatherings: {
+                        'Most of the times': { type: 'negative', score: 2, advice: "Avoiding social interaction can increase feelings of loneliness. Try to engage in low-pressure social activities, like a brief chat with a neighbor." },
+                        'Sometimes': { type: 'negative', score: 1, advice: "Sometimes avoiding social gatherings is okay, but if it's frequent, try to find small ways to connect with others." },
+                        'Not at all': { type: 'positive', advice: "It's great that you're not avoiding social gatherings! Social connection is vital for mental health." }
+                    },
+                    SleepWell: {
+                        'Most of the times': { type: 'positive', advice: "Good sleep is fundamental for mental and physical health. Keep up your healthy sleep habits!" },
+                        'Sometimes': { type: 'negative', score: 1, advice: "Inconsistent sleep can impact your mood. Establishing a consistent sleep schedule and a relaxing bedtime routine can be beneficial." },
+                        'Not at all': { type: 'negative', score: 2, advice: "Poor sleep significantly impacts mood. Establishing a consistent sleep schedule and a relaxing bedtime routine can be beneficial." }
+                    },
+                    FeelBadAndGuilty: {
+                        'Most of the times': { type: 'negative', score: 2, advice: "Excessive guilt can be very heavy. Try to practice self-compassion and remember that everyone makes mistakes." },
+                        'Sometimes': { type: 'negative', score: 1, advice: "Occasional feelings of guilt are normal, but if they persist, practicing self-compassion can be helpful." },
+                        'Not at all': { type: 'positive', advice: "It's healthy that you don't often feel bad or guilty. Maintaining a balanced perspective is important." }
+                    }
+                };
+
+                // Questions to include in detailed analysis advice (excluding personal info)
+                const analysisQuestions = [
+                    'SatisfiedLife', 'DroppedActivities', 'FeelLifeEmpty', 'Bored', 'FeelHelpless',
+                    'AfraidBadHappening', 'HopefulAboutFuture', 'SpendTimeHappily', 'FeelEnergy',
+                    'PreferStayHome', 'MemoryLoss', 'ConsiderWorthless', 'CryMostOfTheTime',
+                    'FeelingReduceAppetiteAndLosingWeight', 'SituationHopeless', 'PeopleBetterThanYou',
+                    'OthersWouldBetterYouDied', 'AvoidingSocialGatherings', 'SleepWell', 'FeelBadAndGuilty'
+                ];
+
+                for (const qName of analysisQuestions) {
+                    const answer = responses[qName];
+                    const impactConfig = questionImpact[qName];
+
+                    if (impactConfig) {
+                        const responseType = impactToType(impactConfig, answer); // Use helper for type
+                        const advice = impactConfig[answer]?.advice;
+                        const score = impactConfig[answer]?.score || 0;
+
+                        if (responseType === 'positive') {
+                            positiveAspectsDetails.push({ question: qName, answer: answer, advice: advice });
+                        } else if (responseType === 'negative') {
+                            riskScore += score;
+                            areasForGrowthDetails.push({ question: qName, answer: answer, advice: advice });
+                        }
+                    }
+                }
+
+                let prediction;
+                let reasoningText;
+                let highlightClass = '';
+
+                if (riskScore >= 10) {
+                    prediction = "High Risk of Depression";
+                    reasoningText = "Based on your responses, there are significant indicators suggesting a high risk of depression. It's important to take these feelings seriously.";
+                    highlightClass = 'red-highlight';
+                } else if (riskScore >= 5) {
+                    prediction = "Moderate Risk of Depression";
+                    reasoningText = "Your responses indicate some areas of concern, suggesting a moderate risk of depression. Paying attention to these feelings is important.";
+                    highlightClass = 'orange-highlight';
+                } else {
+                    prediction = "Low Risk of Depression";
+                    reasoningText = "Based on your responses, you appear to be experiencing a low level of risk. This is a positive sign, and it's great that you're taking steps to understand your well-being.";
+                    highlightClass = 'green-highlight';
+                }
+
+                // Add a generic positive message if no specific positive aspects were found
+                if (positiveAspectsDetails.length === 0 && prediction === "Low Risk of Depression") {
+                    positiveAspectsDetails.push({ question: "Overall Well-being", answer: "Positive", advice: "You're doing well! Continue engaging in activities that bring you joy and maintain healthy routines. Regular self-care is key to sustaining good mental health." });
+                } else if (positiveAspectsDetails.length === 0) {
+                    positiveAspectsDetails.push({ question: "Overall Well-being", answer: "N/A", advice: "While specific positive indicators weren't highlighted in this analysis, remember to acknowledge your strengths and small victories. Every effort counts!" });
+                }
+
+                // Add a generic area for growth message if no specific negative aspects were found but risk isn't low
+                if (areasForGrowthDetails.length === 0 && prediction !== "Low Risk of Depression") {
+                    areasForGrowthDetails.push({ question: "Overall Well-being", answer: "N/A", advice: "While no specific areas for growth were highlighted from the questions, consider reflecting on your overall emotional state and seeking support if needed." });
+                } else if (areasForGrowthDetails.length === 0 && prediction === "Low Risk of Depression") {
+                    areasForGrowthDetails.push({ question: "Overall Well-being", answer: "N/A", advice: "No specific areas for growth highlighted based on the current questions. Keep up your positive habits!" });
+                }
+
+
+                return { prediction, reasoning: reasoningText, positiveAspects: positiveAspectsDetails, areasForGrowth: areasForGrowthDetails, highlightClass };
+            }
+
+            // Helper function to determine type based on questionImpact structure
+            function impactToType(impactConfig, answer) {
+                if (impactConfig[answer] && impactConfig[answer].type) {
+                    return impactConfig[answer].type;
+                }
+                // Default logic for Yes/No questions if 'type' isn't explicitly defined in impactConfig
+                if (['SatisfiedLife', 'HopefulAboutFuture', 'SpendTimeHappily', 'FeelEnergy'].includes(Object.keys(impactConfig)[0])) {
+                    return answer === 'Yes' ? 'positive' : 'negative';
+                } else {
+                    return answer === 'No' ? 'positive' : 'negative';
+                }
+            }
+            // --- End of Simulated Decision Tree Logic ---
+
+
+            // Get references to main containers
+            const homepage = document.getElementById('homepage');
+            const surveyContainer = document.getElementById('surveyContainer');
+
+            // Get references to buttons
+            const openSurveyBtn = document.getElementById('openSurveyBtn');
+            const returnHomeFromSurveyBtn = document.getElementById('returnHomeFromSurvey');
+            const openAITherapistBtn = document.getElementById('openAITherapistBtn'); // New AI Therapist button
+
+            // Get references to survey form elements
+            const form = document.getElementById('depressionSurveyForm');
+            const surveyResultsDiv = document.getElementById('surveyResults');
+            const ageInput = document.getElementById('Age');
+            const ageError = document.getElementById('ageError');
+            const validationMessage = document.getElementById('validationMessage');
+            const resetSurveyButton = document.getElementById('resetSurvey');
+            
+            const getGeminiAdviceButton = document.getElementById('getGeminiAdvice');
+            const geminiAdviceButtonText = document.getElementById('geminiAdviceButtonText');
+            const geminiAdviceSpinner = document.getElementById('geminiAdviceSpinner');
+            const llmAdviceBox = document.getElementById('llmAdviceBox');
+            const llmAdviceContent = document.getElementById('llmAdviceContent');
+
+            // Elements for Journal Prompt
+            const getJournalPromptButton = document.getElementById('getJournalPrompt');
+            const journalPromptButtonText = document.getElementById('journalPromptButtonText');
+            const journalPromptSpinner = document.getElementById('journalPromptSpinner');
+            const journalPromptBox = document.getElementById('journalPromptBox');
+            const journalPromptContent = document.getElementById('journalPromptContent');
+
+            // Elements for Positive Affirmation
+            const getPositiveAffirmationButton = document.getElementById('getPositiveAffirmation');
+            const positiveAffirmationButtonText = document.getElementById('positiveAffirmationButtonText');
+            const positiveAffirmationSpinner = document.getElementById('positiveAffirmationSpinner');
+            const positiveAffirmationBox = document.getElementById('positiveAffirmationBox');
+            const positiveAffirmationContent = document.getElementById('positiveAffirmationContent');
+
+            // Element for Fill Randomly button
+            const fillRandomlyBtn = document.getElementById('fillRandomlyBtn');
+
+            // AI Therapist Modal elements
+            const aiTherapistModal = document.getElementById('aiTherapistModal');
+            const closeAITherapistModalBtn = document.getElementById('closeAITherapistModal');
+            const chatMessagesDiv = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+
+            // Age increment/decrement buttons
+            const decrementAgeBtn = document.getElementById('decrementAgeBtn');
+            const incrementAgeBtn = document.getElementById('incrementAgeBtn');
+
+            // Initialize chat history with AI's greeting (Gemini format)
+            // Note: The initial prompt for the AI therapist is now part of the `callAI` function
+            // to allow it to be sent to either Gemini or DeepSeek.
+            let chatHistory = [];
+
+
+            // Analysis and results elements (now always visible)
+            const decisionOutputBox = document.getElementById('decisionOutputBox');
+            const detailedAnalysisBox = document.getElementById('detailedAnalysisBox');
+            const analysisReasoning = document.getElementById('analysisReasoning');
+            const positiveAspectsList = document.getElementById('positiveAspectsList');
+            const areasForGrowthList = document.getElementById('areasForGrowthList');
+
+            let lastSurveyResponses = {};
+            let lastPredictionResult = "";
+            let lastAreasForGrowth = [];
+            let lastPositiveAspects = [];
+
+            // Global disclaimer element
+            const globalDisclaimer = document.getElementById('globalDisclaimer');
+
+
+            // --- Navigation Functions ---
+            function showPage(pageId) {
+                console.log(`Attempting to show page: ${pageId}`);
+                // Hide all containers first
+                homepage.classList.add('hidden');
+                surveyContainer.classList.add('hidden');
+                aiTherapistModal.classList.remove('active'); // Ensure modal is hidden when navigating pages
+                globalDisclaimer.classList.add('hidden'); // Hide global disclaimer by default
+
+                // Show the requested page
+                if (pageId === 'homepage') {
+                    homepage.classList.remove('hidden');
+                    globalDisclaimer.classList.remove('hidden'); // Show disclaimer on homepage
+                    console.log('Homepage visibility set to visible');
+                } else if (pageId === 'survey') {
+                    surveyContainer.classList.remove('hidden');
+                    form.classList.remove('hidden'); // Ensure form is visible
+                    surveyResultsDiv.classList.add('hidden'); // Ensure results are hidden
+                    resetSurveyFormState();
+                    console.log('Survey container visibility set to visible');
+                }
+            }
+
+            function resetSurveyFormState() {
+                form.reset();
+                decisionOutputBox.classList.add('hidden');
+                decisionOutputBox.textContent = '';
+                llmAdviceBox.classList.add('hidden');
+                llmAdviceContent.textContent = '';
+                getGeminiAdviceButton.classList.remove('hidden'); // Keep button visible
+                detailedAnalysisBox.classList.add('hidden'); // Hide analysis box initially
+                analysisReasoning.textContent = '';
+                positiveAspectsList.innerHTML = ''; // Clear new lists
+                areasForGrowthList.innerHTML = '';   // Clear new lists
+                journalPromptBox.classList.add('hidden'); // Hide journal prompt box
+                journalPromptContent.textContent = ''; // Clear content
+                getJournalPromptButton.classList.remove('hidden'); // Keep button visible
+                positiveAffirmationBox.classList.add('hidden'); // Hide affirmation box
+                positiveAffirmationContent.textContent = ''; // Clear content
+                getPositiveAffirmationButton.classList.remove('hidden'); // Keep button visible
+
+                // Reset age input
+                ageInput.value = '';
+
+                // Reset custom dropdowns
+                document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                    const selectedValueSpan = dropdown.querySelector('.dropdown-selected-value span');
+                    const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+                    const dropdownName = dropdown.dataset.name;
+                    selectedValueSpan.textContent = `Select ${dropdownName}`;
+                    selectedValueSpan.classList.add('placeholder');
+                    hiddenInput.value = '';
+                    dropdown.querySelectorAll('.dropdown-option-item').forEach(item => item.classList.remove('selected'));
+                    dropdown.querySelector('.dropdown-options').classList.remove('active');
+                    dropdown.querySelector('.dropdown-selected-value').setAttribute('aria-expanded', 'false');
+                    dropdown.querySelector('.dropdown-arrow').classList.remove('rotate');
+                    dropdown.querySelector('.dropdown-selected-value').classList.remove('border-red-500'); // Remove validation border
+                });
+
+                // Reset radio buttons (N/Y and graded)
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                    // Ensure labels revert to default style by removing any checked class
+                    const label = document.querySelector(`label[for="${radio.id}"]`);
+                    if (label) {
+                        label.classList.remove('checked-n', 'checked-y', 'checked-most', 'checked-sometimes', 'checked-not');
+                    }
+                });
+
+                // Clear any previous validation highlights on selects (though now using custom dropdowns)
+                document.querySelectorAll('select').forEach(select => select.classList.remove('border-red-500'));
+                // Also clear temporary red borders on radio button labels
+                document.querySelectorAll('input[type="radio"] + label').forEach(label => label.style.borderColor = '');
+                // Remove all color classes from radio buttons (this was already there, but reiterating)
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.classList.remove('green-option', 'orange-option', 'red-option');
+                });
+            }
+
+            // --- Event Listeners for Navigation ---
+            openSurveyBtn.addEventListener('click', () => {
+                console.log('Open Survey button clicked');
+                showPage('survey');
+            });
+            returnHomeFromSurveyBtn.addEventListener('click', () => {
+                console.log('Return Home from Survey button clicked');
+                showPage('homepage');
+            });
+
+            // --- AI Therapist Modal Functions ---
+            function showAITherapistModal() {
+                aiTherapistModal.classList.add('active');
+                // Reset chat history and display initial message
+                chatMessagesDiv.innerHTML = '<div class="message-bubble ai">Hello! I\'m here to listen and offer supportive responses. How are you feeling today?</div>';
+                // The initial prompt is now handled within callAI for chat
+                chatHistory = []; // Reset chat history
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                chatInput.focus();
+            }
+
+            function hideAITherapistModal() {
+                aiTherapistModal.classList.remove('active');
+            }
+
+            openAITherapistBtn.addEventListener('click', () => {
+                showAITherapistModal();
+            });
+
+            closeAITherapistModalBtn.addEventListener('click', () => {
+                hideAITherapistModal();
+            });
+
+            // Close modal when clicking outside content
+            aiTherapistModal.addEventListener('click', (event) => {
+                if (event.target === aiTherapistModal) {
+                    hideAITherapistModal();
+                }
+            });
+
+            // --- Custom Dropdown Logic ---
+            document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                const selectedValueDiv = dropdown.querySelector('.dropdown-selected-value');
+                const optionsList = dropdown.querySelector('.dropdown-options');
+                const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+                const dropdownArrow = dropdown.querySelector('.dropdown-arrow');
+
+                selectedValueDiv.addEventListener('click', () => {
+                    const isActive = optionsList.classList.toggle('active');
+                    selectedValueDiv.setAttribute('aria-expanded', isActive);
+                    dropdownArrow.classList.toggle('rotate', isActive);
+                    // Close other open dropdowns
+                    document.querySelectorAll('.custom-dropdown .dropdown-options.active').forEach(openOptions => {
+                        if (openOptions !== optionsList) {
+                            openOptions.classList.remove('active');
+                            openOptions.previousElementSibling.setAttribute('aria-expanded', 'false');
+                            openOptions.previousElementSibling.querySelector('.dropdown-arrow').classList.remove('rotate');
+                        }
+                    });
+                });
+
+                optionsList.addEventListener('click', (event) => {
+                    const selectedOption = event.target.closest('.dropdown-option-item');
+                    if (selectedOption) {
+                        const value = selectedOption.dataset.value;
+                        const text = selectedOption.textContent;
+
+                        hiddenInput.value = value;
+                        selectedValueDiv.querySelector('span').textContent = text;
+                        selectedValueDiv.classList.remove('placeholder');
+                        selectedValueDiv.classList.remove('border-red-500'); // Remove validation highlight
+
+                        optionsList.classList.remove('active');
+                        selectedValueDiv.setAttribute('aria-expanded', 'false');
+                        dropdownArrow.classList.remove('rotate');
+
+                        // Remove 'selected' class from all options and add to the clicked one
+                        optionsList.querySelectorAll('.dropdown-option-item').forEach(item => item.classList.remove('selected'));
+                        selectedOption.classList.add('selected');
+                    }
+                });
+
+                // Close dropdown if clicked outside
+                document.addEventListener('click', (event) => {
+                    if (!dropdown.contains(event.target)) {
+                        optionsList.classList.remove('active');
+                        selectedValueDiv.setAttribute('aria-expanded', 'false');
+                        dropdownArrow.classList.remove('rotate');
+                    }
+                });
+
+                // Keyboard navigation for accessibility
+                selectedValueDiv.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectedValueDiv.click(); // Toggle dropdown
+                    } else if (e.key === 'ArrowDown' && optionsList.classList.contains('active')) {
+                        e.preventDefault();
+                        const firstOption = optionsList.querySelector('.dropdown-option-item');
+                        if (firstOption) firstOption.focus();
+                    }
+                });
+
+                optionsList.addEventListener('keydown', (e) => {
+                    const currentFocus = document.activeElement;
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const nextOption = currentFocus.nextElementSibling;
+                        if (nextOption && nextOption.classList.contains('dropdown-option-item')) {
+                            nextOption.focus();
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const prevOption = currentFocus.previousElementSibling;
+                        if (prevOption && prevOption.classList.contains('dropdown-option-item')) {
+                            prevOption.focus();
+                        } else {
+                            selectedValueDiv.focus(); // Move focus back to the button
+                        }
+                    } else if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        currentFocus.click(); // Select the focused option
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        optionsList.classList.remove('active');
+                        selectedValueDiv.setAttribute('aria-expanded', 'false');
+                        dropdownArrow.classList.remove('rotate');
+                        selectedValueDiv.focus();
+                    }
+                });
+            });
+
+
+            // --- Age Input Plus/Minus Logic ---
+            decrementAgeBtn.addEventListener('click', () => {
+                let currentAge = parseInt(ageInput.value);
+                if (!isNaN(currentAge) && currentAge > 1) {
+                    ageInput.value = currentAge - 1;
+                } else if (isNaN(currentAge)) {
+                    ageInput.value = 1; // Set to min if empty
+                }
+            });
+
+            incrementAgeBtn.addEventListener('click', () => {
+                let currentAge = parseInt(ageInput.value);
+                if (!isNaN(currentAge) && currentAge < 120) {
+                    ageInput.value = currentAge + 1;
+                } else if (isNaN(currentAge)) {
+                    ageInput.value = 1; // Set to min if empty
+                }
+            });
+
+            // --- Unified AI Call Function with Fallback ---
+            // This function attempts to call Gemini first, then falls back to DeepSeek if Gemini fails.
+            async function callAI(apiType, messages, isChat = false) {
+                let primaryResponse = null;
+                let secondaryResponse = null;
+                let primaryError = null;
+
+                // Try Primary API (Gemini)
+                try {
+                    console.log(`Attempting to call primary API (Gemini) for ${apiType}.`);
+                    const payload = { contents: messages };
+                    const apiUrl = `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    console.log(`Gemini response for ${apiType}:`, result);
+
+                    if (response.ok && result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        primaryResponse = result.candidates[0].content.parts[0].text;
+                    } else {
+                        primaryError = `Gemini API error: ${result.error?.message || response.statusText}`;
+                        console.warn(`Gemini API failed for ${apiType}:`, primaryError, result);
+                    }
+                } catch (error) {
+                    primaryError = `Gemini fetch error: ${error.message}`;
+                    console.error(`Error calling Gemini API for ${apiType}:`, error);
+                }
+
+                if (primaryResponse) {
+                    return { text: primaryResponse, source: 'Gemini' };
+                } else {
+                    console.warn(`Gemini failed for ${apiType}. Falling back to DeepSeek. Error: ${primaryError}`);
+                    // Fallback to Secondary API (DeepSeek)
+                    try {
+                        // DeepSeek expects messages in a slightly different format (content instead of parts)
+                        const deepseekMessages = messages.map(msg => ({
+                            role: msg.role === 'user' ? 'user' : 'assistant', // DeepSeek uses 'user'/'assistant'
+                            content: msg.parts ? msg.parts[0].text : msg.content // Adapt to DeepSeek's 'content'
+                        }));
+
+                        const payload = {
+                            model: DEEPSEEK_MODEL,
+                            messages: deepseekMessages,
+                        };
+                        const apiUrl = DEEPSEEK_API_URL;
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+                        console.log(`DeepSeek response for ${apiType}:`, result);
+
+                        if (response.ok && result.choices && result.choices.length > 0 &&
+                            result.choices[0].message && result.choices[0].message.content) {
+                            secondaryResponse = result.choices[0].message.content;
+                            return { text: secondaryResponse, source: 'DeepSeek' };
+                        } else {
+                            const secondaryError = `DeepSeek API error: ${result.error?.message || response.statusText}`;
+                            console.error(`DeepSeek API failed for ${apiType}:`, secondaryError, result);
+                            throw new Error(`Both APIs failed. Primary: ${primaryError}. Secondary: ${secondaryError}`);
+                        }
+                    } catch (error) {
+                        const secondaryError = `DeepSeek fetch error: ${error.message}`;
+                        console.error(`Error calling DeepSeek API for ${apiType}:`, error);
+                        throw new Error(`Both APIs failed. Primary: ${primaryError}. Secondary: ${secondaryError}`);
+                    }
+                }
+            }
+
+
+            // --- Chat Functionality (within modal) ---
+            async function sendMessage() {
+                const userMessage = chatInput.value.trim();
+                if (userMessage === '') return;
+
+                // Add user message to chat display
+                addMessageToChat(userMessage, 'user');
+                chatInput.value = ''; // Clear input
+
+                // Add user message to chat history for API (Gemini format for internal storage)
+                chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+                // Add loading indicator for AI response
+                const loadingMessageElement = addMessageToChat('AI is thinking...', 'ai loading');
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
+
+                try {
+                    // Initial AI therapist prompt (sent only once at the start of conversation)
+                    const initialTherapistPrompt = {
+                        role: "user",
+                        parts: [{ text: "You are an AI acting as a supportive therapist. Your goal is to listen, empathize, and provide general coping strategies and positive encouragement. You are not a human professional and cannot provide medical advice or diagnosis. Always maintain a supportive and non-judgmental tone. Keep responses concise and focused on emotional well-being and practical coping. Start by greeting the user and asking how they are feeling." }]
+                    };
+
+                    // Prepend the initial prompt if chatHistory is empty (first message)
+                    const messagesToSend = chatHistory.length === 1 ? [initialTherapistPrompt, ...chatHistory] : chatHistory;
+
+                    const aiResponse = await callAI('chat', messagesToSend, true);
+
+                    // Update loading message with actual AI response
+                    loadingMessageElement.textContent = aiResponse.text;
+                    loadingMessageElement.classList.remove('loading');
+                    // Add AI response to chat history (Gemini format for internal storage)
+                    chatHistory.push({ role: "model", parts: [{ text: aiResponse.text }] });
+
+                } catch (error) {
+                    loadingMessageElement.textContent = `An error occurred: ${error.message}. Please try again later.`;
+                    loadingMessageElement.classList.remove('loading');
+                    console.error("Error in sendMessage:", error);
+                } finally {
+                    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom after response
+                }
+            }
+
+            function addMessageToChat(text, sender) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message-bubble'); // 'message-bubble' is always a base class
+
+                // Split the sender string by spaces and add each part as a separate class
+                sender.split(' ').forEach(cls => {
+                    if (cls) { // Ensure no empty strings are added as classes
+                        messageElement.classList.add(cls);
+                    }
+                });
+                
+                messageElement.textContent = text;
+                chatMessagesDiv.appendChild(messageElement);
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to latest message
+                return messageElement; // Return the element for potential updates (like loading message)
+            }
+
+            chatSendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+
+            // --- Survey Form Logic ---
+            form.addEventListener('submit', async (event) => { // Added async here
+                event.preventDefault();
+                console.log('Form submitted.'); // Debugging log
+
+                // Reset previous messages and styling
+                ageError.classList.add('hidden');
+                validationMessage.classList.add('hidden');
+                decisionOutputBox.classList.add('hidden');
+                decisionOutputBox.textContent = '';
+                llmAdviceBox.classList.add('hidden');
+                llmAdviceContent.textContent = '';
+                getGeminiAdviceButton.classList.remove('hidden'); // Keep button visible
+                detailedAnalysisBox.classList.add('hidden'); // Hide analysis box initially
+                analysisReasoning.textContent = '';
+                positiveAspectsList.innerHTML = ''; // Clear new lists
+                areasForGrowthList.innerHTML = '';   // Clear new lists
+                journalPromptBox.classList.add('hidden'); // Hide journal prompt box
+                journalPromptContent.textContent = ''; // Clear content
+                getJournalPromptButton.classList.remove('hidden'); // Keep button visible
+                positiveAffirmationBox.classList.add('hidden'); // Hide affirmation box
+                positiveAffirmationContent.textContent = ''; // Clear content
+                getPositiveAffirmationButton.classList.remove('hidden'); // Keep button visible
+
+
+                let isValid = true;
+                const responses = {};
+
+                const age = parseInt(ageInput.value);
+                if (isNaN(age) || age < 1 || age > 120) {
+                    ageError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    responses['Age'] = age;
+                }
+
+                // Validate custom dropdowns
+                document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                    const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+                    const selectedValueDiv = dropdown.querySelector('.dropdown-selected-value');
+                    if (!hiddenInput.value) {
+                        isValid = false;
+                        selectedValueDiv.classList.add('border-red-500');
+                    } else {
+                        selectedValueDiv.classList.remove('border-red-500');
+                    }
+                    responses[hiddenInput.name] = hiddenInput.value;
+                });
+
+                // Validate radio buttons
+                const radioQuestionNames = [
+                    'SatisfiedLife', 'DroppedActivities', 'FeelLifeEmpty', 'Bored', 'FeelHelpless',
+                    'AfraidBadHappening', 'HopefulAboutFuture', 'SpendTimeHappily', 'FeelEnergy',
+                    'PreferStayHome', 'MemoryLoss', 'ConsiderWorthless',
+                    'CryMostOfTheTime', 'FeelingReduceAppetiteAndLosingWeight', 'SituationHopeless',
+                    'PeopleBetterThanYou', 'OthersWouldBetterYouDied', 'AvoidingSocialGatherings',
+                    'SleepWell', 'FeelBadAndGuilty'
+                ];
+
+                radioQuestionNames.forEach(qName => {
+                    const selectedRadio = document.querySelector(`input[name="${qName}"]:checked`);
+                    if (selectedRadio) {
+                        responses[qName] = selectedRadio.value;
+                        // No need to remove red border from label, as it's not applied by default now
+                    } else {
+                        isValid = false;
+                        // Highlight the group of radios if not selected by adding red border to labels
+                        document.querySelectorAll(`input[name="${qName}"] + label`).forEach(label => label.style.borderColor = '#ef4444');
+                    }
+                });
+
+                console.log('Validation status:', isValid); // Debugging log
+
+                if (!isValid) {
+                    validationMessage.classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+
+                form.classList.add('hidden');
+                surveyResultsDiv.classList.remove('hidden');
+                console.log('Displaying survey results section.');
+
+
+                // Scroll to the top of the results section immediately after showing it
+                surveyResultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+
+                const simulationResult = simulateDecisionTree(responses);
+                lastPredictionResult = simulationResult.prediction;
+                lastSurveyResponses = responses; // Store full responses for Gemini API
+                lastAreasForGrowth = simulationResult.areasForGrowth; // Store areas for growth for LLM calls
+                lastPositiveAspects = simulationResult.positiveAspects; // Store positive aspects for LLM calls
+
+
+                // Display decision tree prediction at the top
+                decisionOutputBox.textContent = `Decision Tree Prediction: ${lastPredictionResult}`;
+                decisionOutputBox.classList.remove('hidden');
+                console.log('Decision output box unhidden and content set.');
+
+
+                // Apply highlight class to analysis box
+                detailedAnalysisBox.classList.remove('green-highlight', 'orange-highlight', 'red-highlight');
+                detailedAnalysisBox.classList.add(simulationResult.highlightClass);
+
+                // Display overall reasoning
+                analysisReasoning.textContent = simulationResult.reasoning;
+
+                // Populate positive aspects
+                positiveAspectsList.innerHTML = '';
+                simulationResult.positiveAspects.forEach(item => {
+                    const li = document.createElement('li');
+                    let questionText = displayNames[item.question];
+                    let answerText = item.answer;
+
+                    // Handle graded questions display for the list item
+                    const gradedQuestionMap = {
+                        'AvoidingSocialGatherings': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                        'SleepWell': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                        'FeelBadAndGuilty': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' }
+                    };
+                    if (gradedQuestionMap[item.question]) {
+                        answerText = gradedQuestionMap[item.question][item.answer] || item.answer;
+                    }
+
+                    li.textContent = `For "${questionText}" (${answerText}): ${item.advice}`;
+                    positiveAspectsList.appendChild(li);
+                });
+
+                // Populate areas for growth
+                areasForGrowthList.innerHTML = '';
+                simulationResult.areasForGrowth.forEach(item => {
+                    const li = document.createElement('li');
+                    let questionText = displayNames[item.question];
+                    let answerText = item.answer;
+
+                    // Handle graded questions display for the list item
+                    const gradedQuestionMap = {
+                        'AvoidingSocialGatherings': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                        'SleepWell': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                        'FeelBadAndGuilty': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' }
+                    };
+                    if (gradedQuestionMap[item.question]) {
+                        answerText = gradedQuestionMap[item.question][item.answer] || item.answer;
+                    }
+                    li.textContent = `For "${questionText}" (${answerText}): ${item.advice}`;
+                    areasForGrowthList.appendChild(li);
+                });
+
+                detailedAnalysisBox.classList.remove('hidden'); // Make sure analysis box is visible
+                console.log('Detailed analysis box unhidden and content set.'); // Debugging log
+
+
+                console.log('Survey Responses:', lastSurveyResponses);
+                console.log('Simulated Prediction:', lastPredictionResult);
+                console.log('Detailed Analysis:', simulationResult.reasoning);
+                console.log('Positive Aspects:', simulationResult.positiveAspects);
+                console.log('Areas for Growth:', simulationResult.areasForGrowth);
+            });
+
+            // --- Gemini AI Advice Button Logic (for Survey Results) ---
+            getGeminiAdviceButton.addEventListener('click', async () => {
+                geminiAdviceButtonText.classList.add('hidden');
+                geminiAdviceSpinner.classList.remove('hidden');
+                getGeminiAdviceButton.disabled = true;
+                llmAdviceBox.classList.add('hidden');
+                llmAdviceContent.textContent = '';
+
+                try {
+                    // Filter out personal info for the prompt
+                    const relevantResponses = {};
+                    for (const key in lastSurveyResponses) {
+                        if (!['Age', 'Gender', 'Profession', 'MaritalStatus'].includes(key)) {
+                            relevantResponses[key] = lastSurveyResponses[key];
+                        }
+                    }
+
+                    let prompt = `A user completed a self-assessment survey. Their simulated risk level for depression is "${lastPredictionResult}".
+                    Here are some of their key responses (excluding personal details):
+                    ${Object.entries(relevantResponses).map(([q, a]) => {
+                        let questionText = displayNames[q] || q;
+                        let answerText = a;
+                        // Handle graded questions display for LLM prompt
+                        const gradedQuestionMap = {
+                            'AvoidingSocialGatherings': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                            'SleepWell': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' },
+                            'FeelBadAndGuilty': { 'Most of the times': 'Most of the times', 'Sometimes': 'Sometimes', 'Not at all': 'Not at all' }
+                        };
+                        if (gradedQuestionMap[q]) {
+                            answerText = gradedQuestionMap[q][a] || a;
+                        }
+                        return `- ${questionText}: ${answerText}`;
+                    }).join('\n')}
+
+                    Based on this, provide general, supportive advice and common coping strategies.
+                    Keep the advice concise, positive, and actionable.`;
+
+                    let messagesForAdvice = [{ role: "user", parts: [{ text: prompt }] }];
+
+                    const aiResponse = await callAI('advice', messagesForAdvice);
+
+                    llmAdviceContent.textContent = aiResponse.text;
+                    llmAdviceBox.classList.remove('hidden');
+                    console.log(`Advice generated by: ${aiResponse.source}`);
+
+                } catch (error) {
+                    llmAdviceContent.textContent = `An error occurred while fetching advice: ${error.message}. Please try again later.`;
+                    llmAdviceBox.classList.remove('hidden');
+                    console.error("Error in getGeminiAdviceButton click:", error);
+                } finally {
+                    geminiAdviceButtonText.classList.remove('hidden');
+                    geminiAdviceSpinner.classList.add('hidden');
+                    getGeminiAdviceButton.disabled = false;
+                }
+            });
+
+            // --- Gemini AI Journal Prompt Button Logic ---
+            getJournalPromptButton.addEventListener('click', async () => {
+                journalPromptButtonText.classList.add('hidden');
+                journalPromptSpinner.classList.remove('hidden');
+                getJournalPromptButton.disabled = true;
+                journalPromptBox.classList.add('hidden');
+                journalPromptContent.textContent = ''; // Clear previous content
+
+                try {
+                    let prompt = `Based on the user's survey results where their simulated risk for depression is "${lastPredictionResult}" and their identified areas for growth are:
+                    ${lastAreasForGrowth.map(item => `- ${displayNames[item.question]}: ${item.answer}`).join('\n')}
+                    
+                    Generate a single, thoughtful journal prompt (a question or a short statement to reflect on) that encourages self-reflection and emotional processing related to their well-being. The prompt should be supportive and gentle.`;
+
+                    const messagesForPrompt = [{ role: "user", parts: [{ text: prompt }] }];
+
+                    const aiResponse = await callAI('journal prompt', messagesForPrompt);
+
+                    journalPromptContent.textContent = aiResponse.text;
+                    journalPromptBox.classList.remove('hidden');
+                    console.log(`Journal prompt generated by: ${aiResponse.source}`);
+
+                } catch (error) {
+                    journalPromptContent.textContent = `An error occurred while fetching the journal prompt: ${error.message}. Please try again later.`;
+                    journalPromptBox.classList.add('hidden');
+                    console.error("Error in getJournalPromptButton click:", error);
+                } finally {
+                    journalPromptButtonText.classList.remove('hidden');
+                    journalPromptSpinner.classList.add('hidden');
+                    getJournalPromptButton.disabled = false;
+                }
+            });
+
+            // --- Gemini AI Positive Affirmation Button Logic ---
+            getPositiveAffirmationButton.addEventListener('click', async () => {
+                positiveAffirmationButtonText.classList.add('hidden');
+                positiveAffirmationSpinner.classList.remove('hidden');
+                getPositiveAffirmationButton.disabled = true;
+                positiveAffirmationBox.classList.add('hidden');
+                positiveAffirmationContent.textContent = ''; // Clear previous content
+
+                try {
+                    let prompt = `Based on the user's survey results where their simulated risk for depression is "${lastPredictionResult}" and their positive aspects are:
+                    ${lastPositiveAspects.map(item => `- ${displayNames[item.question]}: ${item.answer}`).join('\n')}
+                    
+                    Generate a single, concise, and uplifting positive affirmation. The affirmation should be general but encouraging, reflecting a sense of hope and self-worth. It should be a short, powerful statement.`;
+
+                    const messagesForAffirmation = [{ role: "user", parts: [{ text: prompt }] }];
+
+                    const aiResponse = await callAI('positive affirmation', messagesForAffirmation);
+
+                    positiveAffirmationContent.textContent = aiResponse.text;
+                    positiveAffirmationBox.classList.remove('hidden');
+                    console.log(`Positive affirmation generated by: ${aiResponse.source}`);
+
+                } catch (error) {
+                    positiveAffirmationContent.textContent = `An error occurred while fetching the positive affirmation: ${error.message}. Please try again later.`;
+                    positiveAffirmationBox.classList.add('hidden');
+                    console.error("Error in getPositiveAffirmationButton click:", error);
+                } finally {
+                    positiveAffirmationButtonText.classList.remove('hidden');
+                    positiveAffirmationSpinner.classList.add('hidden');
+                    getPositiveAffirmationButton.disabled = false;
+                }
+            });
+
+
+            // --- Reset Survey Button Logic ---
+            resetSurveyButton.addEventListener('click', () => {
+                resetSurveyFormState();
+                form.classList.remove('hidden');
+                surveyResultsDiv.classList.add('hidden');
+            });
+
+            // --- Fill Survey Randomly Button Logic ---
+            fillRandomlyBtn.addEventListener('click', () => {
+                // Reset form state first to clear any existing selections/errors
+                resetSurveyFormState();
+
+                // Fill Age
+                ageInput.value = Math.floor(Math.random() * (90 - 18 + 1)) + 18; // Random age between 18 and 90
+
+                // Fill custom dropdowns randomly
+                const dropdownsToFill = [
+                    { name: 'Gender', options: ['Male', 'Female'] },
+                    { name: 'Profession', options: ['Student', 'Employee', 'Others'] },
+                    { name: 'MaritalStatus', options: ['Single', 'Married', 'Divorced'] }
+                ];
+
+                dropdownsToFill.forEach(dropdownConfig => {
+                    const dropdownElement = document.querySelector(`.custom-dropdown[data-name="${dropdownConfig.name}"]`);
+                    const randomOption = dropdownConfig.options[Math.floor(Math.random() * dropdownConfig.options.length)];
+                    
+                    const hiddenInput = dropdownElement.querySelector('input[type="hidden"]');
+                    const selectedValueSpan = dropdownElement.querySelector('.dropdown-selected-value span');
+                    const optionsList = dropdownElement.querySelector('.dropdown-options');
+
+                    hiddenInput.value = randomOption;
+                    selectedValueSpan.textContent = randomOption;
+                    selectedValueSpan.classList.remove('placeholder');
+
+                    // Visually mark the selected option in the dropdown list
+                    optionsList.querySelectorAll('.dropdown-option-item').forEach(item => {
+                        item.classList.remove('selected');
+                        if (item.dataset.value === randomOption) {
+                            item.classList.add('selected');
+                        }
+                    });
+                });
+
+                // Fill Yes/No questions randomly
+                const yesNoQuestions = [
+                    'SatisfiedLife', 'DroppedActivities', 'FeelLifeEmpty', 'Bored', 'FeelHelpless',
+                    'AfraidBadHappening', 'HopefulAboutFuture', 'SpendTimeHappily', 'FeelEnergy',
+                    'PreferStayHome', 'MemoryLoss', 'ConsiderWorthless',
+                    'CryMostOfTheTime', 'FeelingReduceAppetiteAndLosingWeight', 'SituationHopeless',
+                    'PeopleBetterThanYou', 'OthersWouldBetterYouDied'
+                ];
+                yesNoQuestions.forEach(qName => {
+                    const options = ['No', 'Yes']; // Order to match N/Y labels
+                    const randomOption = options[Math.floor(Math.random() * options.length)];
+                    const radioElement = document.querySelector(`input[name="${qName}"][value="${randomOption}"]`);
+                    if (radioElement) {
+                        radioElement.checked = true;
+                        // Trigger change event to apply styling
+                        radioElement.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                // Fill Graded questions randomly
+                const gradedQuestions = [
+                    'AvoidingSocialGatherings', 'SleepWell', 'FeelBadAndGuilty'
+                ];
+                const gradedOptions = ['Most of the times', 'Sometimes', 'Not at all'];
+                gradedQuestions.forEach(qName => {
+                    const randomOption = gradedOptions[Math.floor(Math.random() * gradedOptions.length)];
+                    const radioElement = document.querySelector(`input[name="${qName}"][value="${randomOption}"]`);
+                    if (radioElement) {
+                        radioElement.checked = true;
+                        // Trigger change event to apply styling
+                        radioElement.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                // Automatically submit the form after filling
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            });
+
+
+            // Initialize: Show homepage on load
+            showPage('homepage');
+        });
+    </script>
+</body>
+</html>
