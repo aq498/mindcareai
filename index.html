@@ -241,18 +241,43 @@
             overflow-y: auto;
         }
 
-        /* Fix for chat message text wrapping */
+        /* Adjustments for less aggressive text wrapping */
         .chat-text {
-            word-wrap: break-word; /* Corrects wrapping for long words */
-            overflow-wrap: break-word;
+            word-break: normal; /* Prevents breaking words unnecessarily */
+            overflow-wrap: anywhere;
             white-space: pre-wrap; /* Preserves newlines and whitespace */
             max-width: 100%; /* Ensures it respects the parent container width */
+        }
+        .chat-bubble {
+            max-width: 85%; /* Make the chat bubble a bit wider for better wrapping */
         }
 
         .ai-attribution {
             font-size: 0.65rem;
             color: #6b7280;
             margin-top: 0.25rem;
+        }
+
+        /* Custom message box for API status */
+        .api-message {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+            background-color: #4b5563; /* Tailwind gray-700 */
+            z-index: 60;
+            animation: fadeOut 5s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
@@ -639,7 +664,7 @@
                     <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full shadow-lg bg-emerald-500">
                         <svg xmlns="http://www.w3.org/2d000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M7 15h10"/></svg>
                     </div>
-                    <div class="flex flex-col items-start">
+                    <div class="flex flex-col items-start chat-bubble">
                         <div class="p-3 rounded-lg max-w-[75%] sm:max-w-[65%] shadow-sm text-sm chat-text bg-gray-200 text-gray-900 rounded-bl-none">
                             Hello there! I'm here to listen and provide support. How are you feeling today?
                         </div>
@@ -655,6 +680,8 @@
                     <svg xmlns="http://www.w3.org/2d000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send"><path d="m22 2-7 19-9-6-11-2z"/><path d="M22 2L11 13"/></svg>
                 </button>
             </div>
+            <!-- Temporary message box for API status -->
+            <div id="api-message-box" class="hidden api-message"></div>
         </div>
     </div>
 
@@ -690,19 +717,21 @@
             const decrementAgeBtn = document.getElementById('decrementAgeBtn');
             const incrementAgeBtn = document.getElementById('incrementAgeBtn');
             const ageError = document.getElementById('ageError');
-
+            
             // AI Companion DOM elements
             const chatbox = document.getElementById('chatbox');
             const chatInput = document.getElementById('chatInput');
             const sendBtn = document.getElementById('sendBtn');
             const apiStatusElement = document.getElementById('api-status');
+            const apiMessageBox = document.getElementById('api-message-box');
 
             // --- AI API Chat History ---
             const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
+            const DEEPSEEK_MODEL = 'deepseek-chat';
             const defaultInstruction = `You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
             let isLoading = false;
             let chatHistory = [];
-
+            
             // --- Encoding/Decoding Mappings ---
             const encodingMap = {
                 Gender: {
@@ -896,6 +925,19 @@
 
             const hideModal = (modalId) => {
                 document.getElementById(modalId).classList.add('hidden');
+            };
+
+            const showApiMessage = (message, type = 'info') => {
+                apiMessageBox.textContent = message;
+                apiMessageBox.className = `api-message`;
+                if (type === 'success') {
+                    apiMessageBox.classList.add('bg-green-500');
+                } else if (type === 'error') {
+                    apiMessageBox.classList.add('bg-red-500');
+                } else {
+                    apiMessageBox.classList.add('bg-gray-700');
+                }
+                apiMessageBox.classList.remove('hidden');
             };
 
 
@@ -1190,7 +1232,7 @@
             };
 
             // --- AI Companion Chatbox Logic ---
-            const appendMessage = (sender, text) => {
+            const appendMessage = (sender, text, attribution = 'Gemini') => {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('flex', 'items-start', 'space-x-3', 'mb-4');
                 messageDiv.classList.add(sender === 'user' ? 'justify-end' : 'justify-start');
@@ -1202,7 +1244,7 @@
                 iconDiv.innerHTML = sender === 'user' ? `<svg xmlns="http://www.w3.org/2d000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>` : `<svg xmlns="http://www.w3.org/2d000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M7 15h10"/></svg>`;
 
                 const contentDiv = document.createElement('div');
-                contentDiv.classList.add('flex', 'flex-col');
+                contentDiv.classList.add('flex', 'flex-col', 'chat-bubble');
                 if (sender === 'user') {
                     contentDiv.classList.add('items-end');
                 } else {
@@ -1210,7 +1252,7 @@
                 }
 
                 const textDiv = document.createElement('div');
-                textDiv.classList.add('p-3', 'rounded-lg', 'max-w-[75%]', 'sm:max-w-[65%]', 'shadow-sm', 'text-sm', 'chat-text');
+                textDiv.classList.add('p-3', 'rounded-lg', 'max-w-full', 'shadow-sm', 'text-sm', 'chat-text');
                 if (sender === 'user') {
                     textDiv.classList.add('bg-blue-500', 'text-white', 'rounded-br-none');
                 } else {
@@ -1222,7 +1264,7 @@
                 if (sender !== 'user') {
                     const sourceP = document.createElement('p');
                     sourceP.classList.add('ai-attribution');
-                    sourceP.textContent = `Powered by Gemini`;
+                    sourceP.textContent = `Powered by ${attribution}`;
                     contentDiv.appendChild(sourceP);
                 }
 
@@ -1233,7 +1275,7 @@
                 chatbox.scrollTop = chatbox.scrollHeight;
             };
 
-            const showLoadingIndicator = (message) => {
+            const showLoadingIndicator = () => {
                 const loadingDiv = document.createElement('div');
                 loadingDiv.id = 'loadingIndicator';
                 loadingDiv.classList.add('flex', 'justify-start', 'mb-4');
@@ -1259,31 +1301,27 @@
                     loadingDiv.remove();
                 }
             };
-
-            const callApi = async (history) => {
-                const payload = {
-                    contents: history,
-                    generationConfig: {
-                        systemInstruction: {
-                            parts: [{ text: defaultInstruction }]
-                        }
+            
+            const fetchWithBackoff = async (url, options, retries = 5, delay = 1000) => {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429 && retries > 0) { // Too Many Requests
+                        console.warn(`API call failed with status 429. Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithBackoff(url, options, retries - 1, delay * 2);
                     }
-                };
-                // Removed GEMINI_API_KEY from here
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Gemini API call failed with status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`API returned status ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (retries > 0) {
+                        console.error(`Fetch attempt failed: ${error.message}. Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithBackoff(url, options, retries - 1, delay * 2);
+                    }
+                    throw error;
                 }
-                const result = await response.json();
-                return result?.candidates?.[0]?.content?.parts?.[0]?.text;
             };
 
             const sendMessage = async () => {
@@ -1297,25 +1335,98 @@
 
                 chatHistory.push({ role: 'user', parts: [{ text: input }] });
                 appendMessage('user', input);
-                showLoadingIndicator('Thinking...');
-
+                showLoadingIndicator();
+                
                 let responseText = "I'm sorry, I'm unable to connect with the AI services right now. Please try again later.";
+                let attribution = 'Gemini';
 
                 try {
-                    const response = await callApi(chatHistory);
-                    if (response) {
-                        responseText = response;
+                    // --- Primary: Attempt to use Gemini API ---
+                    const geminiApiKey = ""; // Canvas will provide this automatically
+                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`;
+                    const geminiPayload = {
+                        contents: chatHistory,
+                        generationConfig: {
+                            systemInstruction: {
+                                parts: [{ text: defaultInstruction }]
+                            }
+                        }
+                    };
+
+                    const geminiResponse = await fetchWithBackoff(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(geminiPayload)
+                    });
+
+                    const geminiResult = await geminiResponse.json();
+                    const geminiText = geminiResult?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (geminiText) {
+                        responseText = geminiText;
+                        attribution = 'Gemini';
+                        showApiMessage('Using Gemini API', 'success');
                     } else {
-                        throw new Error('API response was not as expected.');
+                        throw new Error('Gemini API response was empty or malformed.');
                     }
-                } catch (error) {
-                    console.error('API call failed:', error);
-                    // responseText already has the fallback message
+
+                } catch (geminiError) {
+                    console.error('Gemini API call failed, attempting fallback to DeepSeek:', geminiError);
+                    showApiMessage('Gemini API failed, falling back...', 'error');
+
+                    // --- Fallback: Attempt to use DeepSeek API ---
+                    try {
+                        // You will need to provide your own DeepSeek API key and the correct URL
+                        // To get an API key: https://platform.deepseek.com/api
+                        const deepseekApiKey = ""; // Add your DeepSeek API key here
+                        const deepseekApiUrl = "https://api.deepseek.com/v1/chat/completions";
+                        
+                        // Deepseek's message format is slightly different
+                        const deepseekMessages = chatHistory.map(msg => ({
+                            role: msg.role === 'model' ? 'assistant' : msg.role,
+                            content: msg.parts.map(part => part.text).join('')
+                        }));
+
+                        const deepseekPayload = {
+                            model: DEEPSEEK_MODEL,
+                            messages: deepseekMessages,
+                            max_tokens: 1024,
+                            temperature: 0.7
+                        };
+
+                        if (!deepseekApiKey) {
+                            throw new Error('DeepSeek API key is missing. Please provide one for the fallback to work.');
+                        }
+
+                        const deepseekResponse = await fetchWithBackoff(deepseekApiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${deepseekApiKey}`
+                            },
+                            body: JSON.stringify(deepseekPayload)
+                        });
+                        
+                        const deepseekResult = await deepseekResponse.json();
+                        const deepseekText = deepseekResult?.choices?.[0]?.message?.content;
+
+                        if (deepseekText) {
+                            responseText = deepseekText;
+                            attribution = 'DeepSeek';
+                            showApiMessage('Using DeepSeek API (fallback)', 'success');
+                        } else {
+                            throw new Error('DeepSeek API response was empty or malformed.');
+                        }
+                    } catch (deepseekError) {
+                        console.error('DeepSeek API fallback also failed:', deepseekError);
+                        showApiMessage('Both APIs failed. Try again later.', 'error');
+                        responseText = 'I apologize, but I am unable to connect with my companion services at this time. Please try again later or reach out to a professional for support.';
+                        attribution = 'Offline';
+                    }
                 } finally {
                     hideLoadingIndicator();
 
                     chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
-                    appendMessage('ai', responseText);
+                    appendMessage('ai', responseText, attribution);
 
                     isLoading = false;
                     chatInput.disabled = false;
