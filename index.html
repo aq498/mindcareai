@@ -9,8 +9,9 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* This prevents horizontal scrolling */
         }
-        
+
         .appsheet-blue {
             background-color: #479EE6;
         }
@@ -35,7 +36,7 @@
             font-size: 1rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        
+
         .dropdown-input.placeholder {
             color: #9ca3af;
         }
@@ -93,7 +94,7 @@
             transition-colors: 0.2s;
             flex-shrink: 0;
         }
-        
+
         .age-input-group button:hover {
             background-color: #d1d5db;
         }
@@ -105,13 +106,13 @@
             padding: 0.75rem 0.5rem;
             outline: none;
         }
-        
+
         /* Styling for the custom radio buttons (Yes/No) */
         .custom-radio-group {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .custom-radio-button {
             flex-grow: 1;
             padding: 0.75rem;
@@ -122,23 +123,23 @@
             cursor: pointer;
             transition: all 0.2s ease-in-out;
         }
-        
+
         .custom-radio-button:hover {
             background-color: #e5e7eb;
         }
-        
+
         .custom-radio-button.selected {
             background-color: #479EE6;
             color: white;
             border-color: #479EE6;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
+
         /* Hide original radio inputs */
         .custom-radio-group input[type="radio"] {
             display: none;
         }
-        
+
         /* Back to Home Button */
         .return-home-btn {
             position: absolute;
@@ -170,7 +171,7 @@
             font-family: monospace;
             font-size: 1.1rem;
         }
-        
+
         /* Modal styling */
         .modal {
             position: fixed;
@@ -226,7 +227,7 @@
             margin-bottom: 0.5rem;
             line-height: 1.5;
         }
-        
+
         /* Chatbox specific styles */
         .chatbox-container {
             height: 60vh;
@@ -237,12 +238,18 @@
             overflow-y: auto;
         }
 
-        .chat-message-source {
-            font-size: 0.6rem;
-            color: #6b7280; /* Tailwind gray-500 */
+        /* Fix for chat message text wrapping */
+        .chat-text {
+            word-wrap: break-word; /* Corrects wrapping for long words */
+            overflow-wrap: break-word;
+            white-space: pre-wrap; /* Preserves newlines and whitespace */
+            max-width: 100%; /* Ensures it respects the parent container width */
+        }
+
+        .ai-attribution {
+            font-size: 0.65rem;
+            color: #6b7280;
             margin-top: 0.25rem;
-            text-align: right;
-            font-style: italic;
         }
     </style>
 </head>
@@ -253,7 +260,7 @@
         <div class="p-12 bg-white rounded-2xl shadow-xl w-full text-center">
             <h1 class="text-4xl md:text-5xl font-bold text-[#479EE6] mb-4">Mental Health App Decoder</h1>
             <p class="text-gray-600 mb-10 text-lg">Use the decoder to analyze a previously encoded survey string or submit a new survey.</p>
-            
+
             <!-- Buttons container -->
             <div class="space-y-6 md:space-y-0 md:flex md:space-x-4">
                 <button
@@ -570,7 +577,7 @@
             </div>
         </form>
     </div>
-    
+
     <!-- --- Decoder Results Container --- -->
     <div id="decoderResultsContainer" class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden hidden relative">
         <button id="returnHomeFromDecoderResults" class="return-home-btn">
@@ -591,14 +598,14 @@
                     <p class="font-semibold">Risk Score: <span id="riskScoreValue"></span></p>
                 </div>
             </div>
-            
+
             <div class="p-4 bg-gray-50 rounded-xl">
                 <h2 class="text-lg font-semibold text-gray-800 mb-2">Analysis</h2>
                 <div id="analysisText" class="text-gray-600 space-y-2"></div>
             </div>
         </div>
     </div>
-    
+
     <!-- --- AI Companion Container --- -->
     <div id="aiCompanionContainer" class="w-full max-w-xl bg-white rounded-2xl shadow-lg flex flex-col hidden relative">
         <button id="returnHomeFromAI" class="return-home-btn">
@@ -612,10 +619,10 @@
             <h1 class="text-3xl font-bold mb-1">AI Companion</h1>
             <p class="text-sm opacity-90">Your companion for general well-being advice. Not a substitute for professional help.</p>
         </div>
-        
+
         <!-- Chatbox area -->
         <div id="chatbox" class="flex-grow p-4 space-y-4 overflow-y-auto chatbox-container">
-            <!-- Messages will be injected here -->
+            <!-- Initial greeting message will be inserted here by JavaScript -->
         </div>
 
         <!-- Input area -->
@@ -649,14 +656,14 @@
             const surveyContainer = document.getElementById('surveyContainer');
             const decoderResultsContainer = document.getElementById('decoderResultsContainer');
             const aiCompanionContainer = document.getElementById('aiCompanionContainer');
-            
+
             const openSurveyBtn = document.getElementById('openSurveyBtn');
             const aiCompanionBtn = document.getElementById('aiCompanionBtn');
-            
+
             const returnHomeFromSurveyBtn = document.getElementById('returnHomeFromSurvey');
             const returnHomeFromDecoderResultsBtn = document.getElementById('returnHomeFromDecoderResults');
             const returnHomeFromAI = document.getElementById('returnHomeFromAI');
-            
+
             const surveyForm = document.getElementById('depressionSurveyForm');
             const decoderModal = document.getElementById('decoderModal');
             const closeDecoderModalBtn = document.getElementById('closeDecoderModal');
@@ -671,23 +678,36 @@
             const decrementAgeBtn = document.getElementById('decrementAgeBtn');
             const incrementAgeBtn = document.getElementById('incrementAgeBtn');
             const ageError = document.getElementById('ageError');
-            
+            const encodedStringDisplay = document.getElementById('encodedStringDisplay');
+            const decodedDataDisplay = document.getElementById('decodedDataDisplay');
+
             // AI Companion DOM elements
             const chatbox = document.getElementById('chatbox');
             const chatInput = document.getElementById('chatInput');
             const sendBtn = document.getElementById('sendBtn');
-            
+
             // --- AI API Key and Chat History ---
             // WARNING: This API key is exposed in the client-side code.
             // For a production application, you should use a secure backend proxy to protect this key.
             const GEMINI_API_KEY = ""; // Using a blank key for security, as it will be filled by the Canvas environment.
-            let chatHistory = [];
             let isLoading = false;
             let currentErrorMessage = '';
 
+            // --- Model Name Configuration ---
+            // A simple boolean to simulate using a different model
+            const isDeepseekModel = false;
+            const MODEL_NAME = isDeepseekModel ? "Simulated DeepSeek" : "Gemini 1.5 Flash";
+
+            let chatHistory = [{
+                role: 'model',
+                parts: [{
+                    text: `Hello there! I'm here to listen and provide support. How are you feeling today? (Model: ${MODEL_NAME})`
+                }]
+            }];
+
             // The updated default instruction for the AI persona.
             // It now includes a directive to gently guide the conversation back to the companion topic.
-            const defaultInstruction = "You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support.";
+            const defaultInstruction = `You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as ${MODEL_NAME}.`;
 
             // --- Encoding/Decoding Mappings ---
             const encodingMap = {
@@ -707,7 +727,7 @@
                     'Not at all': '1', Sometimes: '2', 'Most of the times': '3'
                 }
             };
-            
+
             // Reverse maps for decoding
             const reverseEncodingMap = {
                 Gender: {
@@ -737,24 +757,24 @@
                 { name: 'DroppedActivities', type: 'Yes/No', size: 1 },
                 { name: 'FeelLifeEmpty', type: 'Yes/No', size: 1 },
                 { name: 'Bored', type: 'Yes/No', size: 1 },
-                { name: 'FeelHelpless', type: 'Yes/No', size: 1 }, 
-                { name: 'AfraidBadHappening', type: 'Yes/No', size: 1 }, 
-                { name: 'HopefulAboutFuture', type: 'Yes/No', size: 1 }, 
-                { name: 'SpendTimeHappily', type: 'Yes/No', size: 1 }, 
-                { name: 'FeelEnergy', type: 'Yes/No', size: 1 }, 
-                { name: 'PreferStayHome', type: 'Yes/No', size: 1 }, 
-                { name: 'MemoryLoss', type: 'Yes/No', size: 1 }, 
-                { name: 'ConsiderWorthless', type: 'Yes/No', size: 1 }, 
-                { name: 'CryMostOfTheTime', type: 'Yes/No', size: 1 }, 
-                { name: 'FeelingReduceAppetiteAndLosingWeight', type: 'Yes/No', size: 1 }, 
-                { name: 'SituationHopeless', type: 'Yes/No', size: 1 }, 
-                { name: 'PeopleBetterThanYou', type: 'Yes/No', size: 1 }, 
-                { name: 'OthersWouldBetterYouDied', type: 'Yes/No', size: 1 }, 
-                { name: 'AvoidingSocialGatherings', type: 'Graded', size: 1 }, 
-                { name: 'SleepWell', type: 'Graded', size: 1 }, 
+                { name: 'FeelHelpless', type: 'Yes/No', size: 1 },
+                { name: 'AfraidBadHappening', type: 'Yes/No', size: 1 },
+                { name: 'HopefulAboutFuture', type: 'Yes/No', size: 1 },
+                { name: 'SpendTimeHappily', type: 'Yes/No', size: 1 },
+                { name: 'FeelEnergy', type: 'Yes/No', size: 1 },
+                { name: 'PreferStayHome', type: 'Yes/No', size: 1 },
+                { name: 'MemoryLoss', type: 'Yes/No', size: 1 },
+                { name: 'ConsiderWorthless', type: 'Yes/No', size: 1 },
+                { name: 'CryMostOfTheTime', type: 'Yes/No', size: 1 },
+                { name: 'FeelingReduceAppetiteAndLosingWeight', type: 'Yes/No', size: 1 },
+                { name: 'SituationHopeless', type: 'Yes/No', size: 1 },
+                { name: 'PeopleBetterThanYou', type: 'Yes/No', size: 1 },
+                { name: 'OthersWouldBetterYouDied', type: 'Yes/No', size: 1 },
+                { name: 'AvoidingSocialGatherings', type: 'Graded', size: 1 },
+                { name: 'SleepWell', type: 'Graded', size: 1 },
                 { name: 'FeelBadAndGuilty', type: 'Graded', size: 1 }
             ];
-            
+
             // --- Scoring system for Risk Score calculation ---
             const scoringMap = {
                 'SatisfiedLife': { Yes: 0, No: 1 },
@@ -884,14 +904,33 @@
                 document.getElementById(modalId).classList.add('hidden');
             };
 
+            // Event listener for AI Companion button
+            aiCompanionBtn.addEventListener('click', () => {
+                // When showing the AI companion page, populate the initial greeting and then scroll to the bottom
+                const initialGreeting = `
+                    <div class="flex items-start space-x-3 mb-4 justify-start">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full shadow-lg bg-emerald-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M7 15h10"/></svg>
+                        </div>
+                        <div>
+                            <div class="p-3 rounded-lg max-w-[75%] sm:max-w-[65%] shadow-sm text-sm chat-text bg-gray-200 text-gray-900 rounded-bl-none">
+                                Hello there! I'm here to listen and provide support. How are you feeling today?
+                            </div>
+                            <p class="ai-attribution">Powered by ${MODEL_NAME}</p>
+                        </div>
+                    </div>
+                `;
+                chatbox.innerHTML = initialGreeting;
+                showPage('aiCompanionContainer');
+                chatbox.scrollTop = chatbox.scrollHeight;
+            });
+
             openSurveyBtn.addEventListener('click', () => showPage('surveyContainer'));
             openDecoderFromSurveyBtn.addEventListener('click', () => showModal('decoderModal'));
-            aiCompanionBtn.addEventListener('click', () => showPage('aiCompanionContainer'));
-            
             returnHomeFromSurveyBtn.addEventListener('click', () => showPage('homePage'));
             returnHomeFromDecoderResultsBtn.addEventListener('click', () => showPage('homePage'));
             returnHomeFromAI.addEventListener('click', () => showPage('homePage'));
-            
+
             closeDecoderModalBtn.addEventListener('click', () => hideModal('decoderModal'));
 
             // --- Age Input Logic ---
@@ -924,31 +963,31 @@
                 const optionsContainer = dropdown.querySelector('.dropdown-options');
                 const hiddenInput = dropdown.querySelector('input[type="hidden"]');
                 const options = Array.from(optionsContainer.querySelectorAll('.dropdown-option-item'));
-                
+
                 input.addEventListener('focus', () => {
                     optionsContainer.style.display = 'block';
                 });
-                
+
                 options.forEach(option => {
                     option.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const value = option.dataset.value;
                         const text = option.textContent;
-                        
+
                         input.value = text;
                         input.classList.remove('placeholder');
                         hiddenInput.value = value;
                         optionsContainer.style.display = 'none';
                     });
                 });
-                
+
                 document.addEventListener('click', (e) => {
                     if (!dropdown.contains(e.target)) {
                         optionsContainer.style.display = 'none';
                     }
                 });
             });
-            
+
             // --- Custom Radio Button Logic (Yes/No and Graded) ---
             document.querySelectorAll('.custom-radio-group').forEach(group => {
                 const buttons = group.querySelectorAll('.custom-radio-button');
@@ -979,7 +1018,7 @@
                 const formData = new FormData(surveyForm);
                 let decodedData = {};
                 let isValid = true;
-                
+
                 const requiredFields = Array.from(surveyForm.querySelectorAll('[required]'));
                 for (const field of requiredFields) {
                     if (!field.value) {
@@ -991,7 +1030,7 @@
                         return;
                     }
                 }
-                
+
                 document.querySelectorAll('.custom-radio-group, .custom-dropdown, .age-input-group').forEach(el => {
                     el.style.border = '';
                 });
@@ -1076,7 +1115,7 @@
                     return { diagnosis: 'High Risk', cardColor: 'bg-red-50' };
                 }
             };
-            
+
             const generateAnalysis = (data) => {
                 const analysisLines = [];
                 const positiveResponses = [];
@@ -1104,15 +1143,17 @@
                     'AvoidingSocialGatherings': 'Are you avoiding social gatherings?',
                     'SleepWell': 'Do you sleep well?',
                     'FeelBadAndGuilty': 'Do you feel bad and guilty?',
-                    'Gender': 'Gender'
+                    'Gender': 'Gender',
+                    'Profession': 'Profession',
+                    'MaritalStatus': 'Marital Status'
                 };
-                
+
                 // Demographic questions to be excluded, except for 'Croissant' gender
                 const demographicExclusions = ['Profession', 'MaritalStatus'];
-                
+
                 // Get gender for special case
                 const gender = data['Gender'];
-                
+
                 for (const key in data) {
                     // Skip demographic questions unless it's the special gender case
                     if (demographicExclusions.includes(key)) {
@@ -1133,7 +1174,7 @@
                     }
 
                     const questionName = readableNames[key] || key;
-                    
+
                     if (adviceMap[key] && adviceMap[key][answer]) {
                         const advice = adviceMap[key][answer];
                         const line = `<p class="analysis-${score <= 0 ? 'positive' : 'negative'}">${questionName} (${answer}): ${advice}</p>`;
@@ -1144,7 +1185,7 @@
                         }
                     }
                 }
-                
+
                 const combinedResponses = [...positiveResponses.sort((a, b) => a.localeCompare(b)), ...negativeResponses.sort((a, b) => a.localeCompare(b))];
                 return combinedResponses.join('');
             };
@@ -1161,17 +1202,17 @@
                 diagnosisText.textContent = diagnosis;
                 riskScoreValue.textContent = riskScore;
                 diagnosisCard.className = `p-4 rounded-xl ${cardColor}`;
-                
+
                 // Update analysis
                 analysisText.innerHTML = analysisHtml;
-                
+
                 showPage('decoderResultsContainer');
                 // Hide the modal if it's open
                 hideModal('decoderModal');
             };
-            
+
             // --- AI Companion Chatbox Logic ---
-            const appendMessage = (sender, text, source = null) => {
+            const appendMessage = (sender, text) => {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('flex', 'items-start', 'space-x-3', 'mb-4');
                 messageDiv.classList.add(sender === 'user' ? 'justify-end' : 'justify-start');
@@ -1182,30 +1223,33 @@
 
                 iconDiv.innerHTML = sender === 'user' ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white lucide lucide-bot"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M7 15h10"/></svg>`;
 
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('flex', 'flex-col');
+                if (sender === 'user') {
+                    contentDiv.classList.add('items-end');
+                } else {
+                    contentDiv.classList.add('items-start');
+                }
+
                 const textDiv = document.createElement('div');
-                textDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'shadow-sm', 'text-sm');
+                textDiv.classList.add('p-3', 'rounded-lg', 'max-w-[75%]', 'sm:max-w-[65%]', 'shadow-sm', 'text-sm', 'chat-text');
                 if (sender === 'user') {
                     textDiv.classList.add('bg-blue-500', 'text-white', 'rounded-br-none');
                 } else {
                     textDiv.classList.add('bg-gray-200', 'text-gray-900', 'rounded-bl-none');
                 }
+                textDiv.textContent = text; // Use textContent to prevent XSS
+                contentDiv.appendChild(textDiv);
 
-                textDiv.innerHTML = text;
-                
-                if (source) {
-                    const sourceSpan = document.createElement('span');
-                    sourceSpan.classList.add('chat-message-source');
-                    sourceSpan.textContent = `Source: ${source}`;
-                    textDiv.appendChild(sourceSpan);
+                if (sender !== 'user') {
+                    const sourceP = document.createElement('p');
+                    sourceP.classList.add('ai-attribution');
+                    sourceP.textContent = `Powered by ${MODEL_NAME}`;
+                    contentDiv.appendChild(sourceP);
                 }
 
-                if (sender === 'user') {
-                    messageDiv.appendChild(textDiv);
-                    messageDiv.appendChild(iconDiv);
-                } else {
-                    messageDiv.appendChild(iconDiv);
-                    messageDiv.appendChild(textDiv);
-                }
+                messageDiv.appendChild(iconDiv);
+                messageDiv.appendChild(contentDiv);
 
                 chatbox.appendChild(messageDiv);
                 chatbox.scrollTop = chatbox.scrollHeight;
@@ -1248,6 +1292,44 @@
                 }
             };
 
+            // --- Core API call function with retry logic ---
+            const callGeminiAPI = async (history) => {
+                const payload = { contents: history };
+                const apiKey = GEMINI_API_KEY;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const maxRetries = 5;
+                let retries = 0;
+                let response;
+
+                while (retries < maxRetries) {
+                    try {
+                        updateLoadingIndicator(`Thinking... (Attempt ${retries + 1})`);
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            return await response.json(); // Success, return the parsed JSON
+                        } else {
+                            throw new Error(`API call failed with status: ${response.status}`);
+                        }
+                    } catch (error) {
+                        retries++;
+                        console.error(`API call failed (Attempt ${retries}):`, error);
+                        if (retries < maxRetries) {
+                            const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+                            await new Promise(res => setTimeout(res, delay));
+                        } else {
+                            throw error; // Max retries reached, throw the last error
+                        }
+                    }
+                }
+                throw new Error('Max API retries reached. Could not get a response.');
+            };
+
             const sendMessage = async () => {
                 const input = chatInput.value.trim();
                 if (!input || isLoading) return;
@@ -1257,82 +1339,37 @@
                 chatInput.disabled = true;
                 sendBtn.disabled = true;
 
-                // Create the full prompt by combining the default instruction and user input
-                const fullPrompt = `${defaultInstruction}\n\nUser: ${input}`;
-
-                // Add user message to chat history and display it
+                // Add user message to history
                 chatHistory.push({ role: 'user', parts: [{ text: input }] });
                 appendMessage('user', input);
-                showLoadingIndicator('Attempting to contact AI...');
+                showLoadingIndicator('Thinking...');
 
-                let responseText = "I'm sorry, I couldn't get a response. Please try again.";
-                let responseSource = "Unknown";
-                
+                let responseText = "I'm sorry, I'm unable to connect with the AI service right now. Please try again later.";
+
                 try {
-                    // --- Primary API Call: Gemini ---
-                    const geminiApiKey = ""; // Will be populated by Canvas
-                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
-                    
-                    const payload = { contents: [{ role: "user", parts: [{ text: fullPrompt }] }] };
-                    
-                    const geminiResponse = await fetch(geminiApiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const geminiResult = await geminiResponse.json();
-                    
-                    if (geminiResult.candidates && geminiResult.candidates.length > 0 && geminiResult.candidates[0].content && geminiResult.candidates[0].content.parts && geminiResult.candidates[0].content.parts.length > 0) {
-                        responseText = geminiResult.candidates[0].content.parts[0].text;
-                        responseSource = 'gemini-2.5-flash-preview-05-20';
+                    const result = await callGeminiAPI(chatHistory);
+
+                    // Check for the expected JSON structure to prevent "Unexpected end of input"
+                    if (
+                        result.candidates &&
+                        result.candidates.length > 0 &&
+                        result.candidates[0].content &&
+                        result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0
+                    ) {
+                        responseText = result.candidates[0].content.parts[0].text;
                     } else {
-                        throw new Error('Invalid Gemini API response format.');
+                        console.error('Unexpected API response structure:', result);
                     }
-                    
-                } catch (geminiError) {
-                    // Fallback system: If Gemini fails, try a different API (DeepSeek simulated here)
-                    console.error('Gemini API failed:', geminiError);
-                    updateLoadingIndicator('Gemini failed. Falling back...');
-
-                    try {
-                        // NOTE: This is a simulated DeepSeek API call.
-                        // In a real application, you would replace this with a valid fetch call.
-                        const deepseekResponse = await new Promise((resolve, reject) => {
-                            setTimeout(() => {
-                                const success = Math.random() > 0.1; // 90% chance of success for demo
-                                if (success) {
-                                    resolve({
-                                        ok: true,
-                                        json: () => Promise.resolve({
-                                            choices: [{
-                                                message: {
-                                                    content: "DeepSeek is here to help! I hear what you're saying and I'm here for you."
-                                                }
-                                            }]
-                                        })
-                                    });
-                                } else {
-                                    reject(new Error("DeepSeek (simulated) API failed."));
-                                }
-                            }, 2000); // Simulate network latency
-                        });
-                        
-                        const deepseekResult = await deepseekResponse.json();
-                        responseText = deepseekResult?.choices?.[0]?.message?.content || "DeepSeek could not provide a response.";
-                        responseSource = "Simulated DeepSeek";
-
-                    } catch (deepseekError) {
-                        console.error('DeepSeek (simulated) API failed:', deepseekError);
-                        responseText = "Both AI services failed to respond. Please try again later.";
-                        responseSource = "None";
-                    }
+                } catch (error) {
+                    console.error('Error during API call:', error);
+                    // The fallback message is already set, so no action needed here.
                 } finally {
                     hideLoadingIndicator();
-                    
-                    // Add the final AI response to chat history and display it, now including the source
-                    chatHistory.push({ role: 'model', parts: [{ text: responseText, source: responseSource }] });
-                    appendMessage('ai', responseText, responseSource);
+
+                    // Add AI message to history
+                    chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
+                    appendMessage('ai', responseText);
 
                     isLoading = false;
                     chatInput.disabled = false;
@@ -1340,7 +1377,7 @@
                     chatInput.focus();
                 }
             };
-            
+
             sendBtn.addEventListener('click', sendMessage);
             chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
