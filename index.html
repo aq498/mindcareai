@@ -1302,7 +1302,7 @@
                 }
             };
             
-            const fetchWithBackoff = async (url, options, retries = 5, delay = 1000) => {
+            const fetchWithBackoff = async (url, options, retries = 1, delay = 1000) => {
                 try {
                     const response = await fetch(url, options);
                     if (response.status === 429 && retries > 0) { // Too Many Requests
