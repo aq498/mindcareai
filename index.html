@@ -666,7 +666,7 @@
                     </div>
                     <div class="flex flex-col items-start chat-bubble">
                         <div class="p-3 rounded-lg max-w-[75%] sm:max-w-[65%] shadow-sm text-sm chat-text bg-gray-200 text-gray-900 rounded-bl-none">
-                            Hello there! I'm here to listen and provide support. How are you feeling today?
+Hello there! I'm here to listen and provide support. How are you feeling today?
                         </div>
                         <p class="ai-attribution">Powered by Gemini</p>
                     </div>
@@ -728,7 +728,7 @@
             // --- AI API Chat History ---
             const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
             const DEEPSEEK_MODEL = 'deepseek-chat';
-            const defaultInstruction = `You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
+            const defaultInstruction = `please keep generation time under 10 seconds and under 150 words.You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
             let isLoading = false;
             let chatHistory = [];
             
