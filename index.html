@@ -971,7 +971,7 @@
             ageInput.addEventListener('input', () => {
                 let age = parseInt(ageInput.value);
                 if (age < 1 || age > 120) {
-                    ageError.classList.remove('hidden');
+                     ageError.classList.remove('hidden');
                 } else {
                     ageError.classList.add('hidden');
                 }
@@ -1338,10 +1338,10 @@
                 showLoadingIndicator();
                 
                 let responseText = "I'm sorry, I'm unable to connect with the AI services right now. Please try again later.";
-                let attribution = 'Gemini';
+                let attribution = 'Offline';
 
                 try {
-                    // --- Primary: Attempt to use Gemini API ---
+                    // --- PRIMARY: Attempt to use Gemini API ---
                     const geminiApiKey = ""; // Canvas will provide this automatically
                     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`;
                     const geminiPayload = {
@@ -1366,57 +1366,59 @@
                         attribution = 'Gemini';
                         showApiMessage('Using Gemini API', 'success');
                     } else {
+                        // Throw an error if Gemini response is malformed, so the catch block handles the fallback
                         throw new Error('Gemini API response was empty or malformed.');
                     }
-
                 } catch (geminiError) {
                     console.error('Gemini API call failed, attempting fallback to DeepSeek:', geminiError);
                     showApiMessage('Gemini API failed, falling back...', 'error');
 
-                    // --- Fallback: Attempt to use DeepSeek API ---
+                    // --- FALLBACK: Attempt to use DeepSeek API or a simulated response ---
                     try {
-                        // You will need to provide your own DeepSeek API key and the correct URL
-                        // To get an API key: https://platform.deepseek.com/api
-                        const deepseekApiKey = ""; // Add your DeepSeek API key here
-                        const deepseekApiUrl = "https://api.deepseek.com/v1/chat/completions";
-                        
-                        // Deepseek's message format is slightly different
-                        const deepseekMessages = chatHistory.map(msg => ({
-                            role: msg.role === 'model' ? 'assistant' : msg.role,
-                            content: msg.parts.map(part => part.text).join('')
-                        }));
+                        const deepseekApiKey = "sk-517b3eac91cb4f49908d226cee8dbddd"; // IMPORTANT: You can add your DeepSeek API key here if you have one.
+                        if (deepseekApiKey) {
+                            const deepseekApiUrl = "https://api.deepseek.com/v1/chat/completions";
+                            
+                            const deepseekMessages = chatHistory.map(msg => ({
+                                role: msg.role === 'model' ? 'assistant' : msg.role,
+                                content: msg.parts.map(part => part.text).join('')
+                            }));
 
-                        const deepseekPayload = {
-                            model: DEEPSEEK_MODEL,
-                            messages: deepseekMessages,
-                            max_tokens: 1024,
-                            temperature: 0.7
-                        };
+                            const deepseekPayload = {
+                                model: DEEPSEEK_MODEL,
+                                messages: deepseekMessages,
+                                max_tokens: 1024,
+                                temperature: 0.7
+                            };
 
-                        if (!deepseekApiKey) {
-                            throw new Error('DeepSeek API key is missing. Please provide one for the fallback to work.');
-                        }
+                            const deepseekResponse = await fetchWithBackoff(deepseekApiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${deepseekApiKey}`
+                                },
+                                body: JSON.stringify(deepseekPayload)
+                            });
+                            
+                            const deepseekResult = await deepseekResponse.json();
+                            const deepseekText = deepseekResult?.choices?.[0]?.message?.content;
 
-                        const deepseekResponse = await fetchWithBackoff(deepseekApiUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${deepseekApiKey}`
-                            },
-                            body: JSON.stringify(deepseekPayload)
-                        });
-                        
-                        const deepseekResult = await deepseekResponse.json();
-                        const deepseekText = deepseekResult?.choices?.[0]?.message?.content;
-
-                        if (deepseekText) {
-                            responseText = deepseekText;
-                            attribution = 'DeepSeek';
-                            showApiMessage('Using DeepSeek API (fallback)', 'success');
+                            if (deepseekText) {
+                                responseText = deepseekText;
+                                attribution = 'DeepSeek';
+                                showApiMessage('Using DeepSeek API (fallback)', 'success');
+                            } else {
+                                throw new Error('DeepSeek API response was empty or malformed.');
+                            }
                         } else {
-                            throw new Error('DeepSeek API response was empty or malformed.');
+                            // SIMULATED RESPONSE if no DeepSeek API key is provided
+                            console.warn('DeepSeek API key is missing. Providing a simulated response.');
+                            showApiMessage('Simulating DeepSeek API (fallback)', 'success');
+                            responseText = 'I apologize, but I am unable to connect with my primary companion services at this time. As a fallback, I can offer some general support. Please know that your feelings are valid, and taking the time to share them is a positive step. How can I support you right now?';
+                            attribution = 'Simulated DeepSeek';
                         }
                     } catch (deepseekError) {
+                        // Final fallback if DeepSeek also fails
                         console.error('DeepSeek API fallback also failed:', deepseekError);
                         showApiMessage('Both APIs failed. Try again later.', 'error');
                         responseText = 'I apologize, but I am unable to connect with my companion services at this time. Please try again later or reach out to a professional for support.';
@@ -1424,10 +1426,8 @@
                     }
                 } finally {
                     hideLoadingIndicator();
-
                     chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
                     appendMessage('ai', responseText, attribution);
-
                     isLoading = false;
                     chatInput.disabled = false;
                     sendBtn.disabled = false;
