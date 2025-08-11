@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mental Health App</title>
+    <title>MindcareAI</title>
     <!-- Load Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -295,7 +295,7 @@
                     id="openSurveyBtn"
                     class="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
-                    Fill Out Survey
+                    Fill Out Depression Test
                 </button>
                 <button
                     id="aiCompanionBtn"
@@ -309,11 +309,11 @@
         <!-- Disclaimer container -->
         <div class="mt-8 p-6 bg-red-50 border-2 border-red-200 rounded-xl shadow-inner w-full text-left text-sm text-red-800">
             <p class="font-bold mb-2">Disclaimer:</p>
-            <p>This application provides a numerical encoding/decoding of survey answers. It is not a medical diagnosis or a substitute for professional help.</p>
+            <p>This application provide simulated testing for depression. It is not a medical diagnosis or a substitute for professional help.</p>
         </div>
     </div>
 
-    <!-- --- Survey Container --- -->
+    <!-- --- Test Container --- -->
     <div id="surveyContainer" class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden hidden relative">
         <button id="returnHomeFromSurvey" class="return-home-btn">
             <!-- Home icon SVG -->
@@ -328,7 +328,7 @@
             <p class="text-sm opacity-90">Please answer the questions below to submit the survey.</p>
         </div>
 
-        <!-- Survey Form -->
+        <!-- Test Form -->
         <form id="depressionSurveyForm" class="p-6 space-y-6">
             <!-- Section: Personal Information -->
             <div class="border-b border-gray-200 pb-4">
