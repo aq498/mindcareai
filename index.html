@@ -728,7 +728,7 @@ Hello there! I'm here to listen and provide support. How are you feeling today?
             // --- AI API Chat History ---
             const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
             const DEEPSEEK_MODEL = 'deepseek-chat';
-            const defaultInstruction = `please keep generation time under 10 seconds and under 150 words.You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
+            const defaultInstruction = `please keep generation time under 5 seconds and under 100 words.You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
             let isLoading = false;
             let chatHistory = [];
             
@@ -1371,7 +1371,7 @@ Hello there! I'm here to listen and provide support. How are you feeling today?
                     }
                 } catch (geminiError) {
                     console.error('Gemini API call failed, attempting fallback to DeepSeek:', geminiError);
-                    showApiMessage('Gemini API failed, falling back...', 'error');
+                    showApiMessage('Gemini API failed, swiching to another...', 'error');
 
                     // --- FALLBACK: Attempt to use DeepSeek API or a simulated response ---
                     try {
