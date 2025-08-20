@@ -309,9 +309,14 @@
         <!-- Disclaimer container -->
         <div class="mt-8 p-6 bg-red-50 border-2 border-red-200 rounded-xl shadow-inner w-full text-left text-sm text-red-800">
             <p class="font-bold mb-2">Disclaimer:</p>
-            <p>👋 “Hi, I’m Mindcare AI!
-I’m here to help you learn how professionals assess depression and encourage mental well-being.
-This isn’t a diagnosis — just a way to reflect. If you're feeling distressed, please seek help. 💬”</p>
+            <p>”This AI companion offers general emotional support only.
+It is not a substitute for professional mental health care.
+
+The beta depression detection test is experimental.
+It is for informational purposes and does not provide a medical diagnosis.
+If you're feeling distressed or think you may be experiencing depression,
+please consult a licensed mental health professional.
+Use of this tool is voluntary and at your own discretion.”</p>
         </div>
     </div>
 
@@ -730,7 +735,7 @@ Hello there! I'm here to listen and provide support. How are you feeling today?
             // --- AI API Chat History ---
             const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
             const DEEPSEEK_MODEL = 'deepseek-chat';
-            const defaultInstruction = `please keep generation time under 2 seconds and under 20 words.You are a helpful and respectful AI assistant. You should always act as a kind and empathetic therapist. Your goal is to provide supportive and thoughtful responses to the user's concerns. Please do not provide medical advice, just general emotional support. Your responses should be concise. If the user asks a question that is not related to mental well-being or personal feelings, please answer it briefly and then gently guide the conversation back to their feelings or how you can provide support. You are currently running as a prototype companion.`;
+            const defaultInstruction = `You're a kind and respectful AI assistant who acts like a caring therapist. Focus on offering emotional support and thoughtful responses. Keep answers short and supportive. Don’t give medical advice. If the user asks about something unrelated to feelings or mental well-being, answer briefly and gently steer the conversation back to how they’re feeling or how you can help emotionally. You're a prototype companion. Include international helplines if neccesary`;
             let isLoading = false;
             let chatHistory = [];
             
