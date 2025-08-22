@@ -632,8 +632,9 @@ Use of this tool is voluntary and at your own discretion.</p>
                 <div class="flex items-center gap-2 text-blue-700">
                     <p class="font-semibold">Risk Score: <span id="riskScoreValue"></span></p>
                     <script>
-                      if (riskScoreValue > 25) {
-                        var div = document.getElementById('riskScoreValue');
+                      let Score = 30;
+                      if (Score > 25) {
+                        var div = document.getElementById('Score');
                         div.innerHTML = '999999';
                       }
                     </script>
