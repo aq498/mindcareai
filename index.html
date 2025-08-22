@@ -1136,7 +1136,7 @@ Hello there! I'm here to listen and provide support. How are you feeling today?
             const getDiagnosis = (score) => {
                 if (score <= 5) {
                     return { diagnosis: 'Low Risk', cardColor: 'bg-green-50' };
-                } else if (score > 5 && score <= 15) {
+                } else if (score > 8 && score <= 15) {
                     return { diagnosis: 'Medium Risk', cardColor: 'bg-yellow-50' };
                 } else {
                     return { diagnosis: 'High Risk', cardColor: 'bg-red-50' };
