@@ -631,12 +631,12 @@ Use of this tool is voluntary and at your own discretion.</p>
                 <h2 class="text-xl font-bold text-blue-800 mb-2">Diagnosis: <span id="diagnosisText"></span></h2>
                 <div class="flex items-center gap-2 text-blue-700">
                     <p class="font-semibold">Risk Score: <span id="riskScoreValue"></span></p>
-<script>
-  if (riskScoreValue > 25) {
-    var div = document.getElementById('divAge');
-    div.innerHTML = '999';
-  }
-</script>
+                    <script>
+                      if (riskScoreValue > 25) {
+                        var div = document.getElementById('riskScoreValue');
+                        div.innerHTML = '999999';
+                      }
+                    </script>
                 </div>
             </div>
 
