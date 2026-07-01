@@ -1355,13 +1355,11 @@ Hello there! I'm here to listen and provide support. How are you feeling today?
                     const geminiApiKey = ""; // Canvas will provide this automatically
                     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiApiKey}`;
                     const geminiPayload = {
-                        contents: chatHistory,
-                        generationConfig: {
-                            systemInstruction: {
-                                parts: [{ text: defaultInstruction }]
-                            }
-                        }
-                    };
+     contents: chatHistory,
+     systemInstruction: {
+         parts: [{ text: defaultInstruction }]
+     }
+ };
 
                     const geminiResponse = await fetchWithBackoff(geminiApiUrl, {
                         method: 'POST',
